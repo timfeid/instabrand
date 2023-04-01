@@ -1,0 +1,7 @@
+/*
+we need to generate these before we introduce ssr
+*/
+body {
+  --font-family: 'Oswald', sans-serif;
+  --title: red;
+}

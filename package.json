@@ -1,0 +1,17 @@
+{
+  "name": "instabrand",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "monorepo": {
+    "public": false,
+    "internalPackages": true,
+    "scope": "@instabrand"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "yarn@3.1.0"
+}

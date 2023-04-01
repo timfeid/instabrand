@@ -1,0 +1,31 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false
+  },
+  "prettier.singleQuote": true,
+  "prettier.jsxSingleQuote": true,
+  "css.lint.unknownAtRules": "ignore",
+  "files.exclude": {
+    "**/build": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    ".pulumi": true,
+    "**/.DS_Store": true,
+    "**/.git": true,
+    "**/.hg": true,
+    "**/.svn": true,
+    "**/.next": true,
+    "**/CVS": true,
+    "**/Thumbs.db": true,
+    "**/.svelte-kit": true,
+    "**/.netlify": true,
+    "**/.yarn": true
+  }
+}
