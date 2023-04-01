@@ -4,7 +4,7 @@ import { Variant as PrismaVariant } from '@instabrand/data'
 import { Context } from 'koa'
 import { Variant } from './variant.schemas'
 import { VariantService } from './variant.service'
-import { ProductPrice } from '../product/product.schemas'
+import { ProductAvailability, ProductPrice } from '../product/product.schemas'
 
 const intl = Intl.NumberFormat('us')
 
@@ -37,5 +37,10 @@ export class VariantResolver {
       actual: `$${(root.priceInCents / 100).toFixed(2)}`,
       compareAt: '$24.00',
     }
+  }
+
+  @FieldResolver()
+  availability() {
+    return ProductAvailability.InStock
   }
 }

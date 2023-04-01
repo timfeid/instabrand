@@ -91,6 +91,8 @@ export async function getProduct(
 						}
 						variant {
 							id
+							slug
+							availability
 							price {
 								actual
 								compareAt

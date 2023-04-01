@@ -12,7 +12,7 @@ export const defaultCart: Cart = {
 };
 
 type CartProduct = {
-	priceId: string;
+	variantSlug: string;
 	quantity: number;
 };
 
@@ -25,21 +25,21 @@ export type Cart = {
 export const cart = writable<Cart>({ ...defaultCart });
 
 export const setCartProduct = (
-	priceId: string,
+	variantSlug: string,
 	quantity: number,
 	replace: string | false = false,
 ) => {
 	cart.update((cart) => {
 		const products = [...cart.products];
 
-		if (replace && replace !== priceId) {
-			const replaceIndex = products.findIndex((product) => product.priceId === replace);
+		if (replace && replace !== variantSlug) {
+			const replaceIndex = products.findIndex((product) => product.variantSlug === replace);
 			if (replaceIndex !== -1) {
 				products.splice(replaceIndex, 1);
 			}
 		}
 
-		const productIndex = products.findIndex((product) => product.priceId === priceId);
+		const productIndex = products.findIndex((product) => product.variantSlug === variantSlug);
 
 		if (productIndex >= 0) {
 			if (quantity === 0) {
@@ -50,7 +50,7 @@ export const setCartProduct = (
 				products[productIndex].quantity = quantity;
 			}
 		} else if (quantity > 0) {
-			products.push({ priceId, quantity });
+			products.push({ variantSlug, quantity });
 		}
 
 		cart.products = products;
@@ -62,7 +62,7 @@ export const setCartProduct = (
 
 export const cartTotalProducts = writable(0);
 
-let times = 0;
+const times = 0;
 
 cart.subscribe(async (data) => {
 	let total = 0;
@@ -76,7 +76,7 @@ cart.subscribe(async (data) => {
 
 	// first time is on subscribe
 	// second time is setting from session
-	if (typeof window !== 'undefined' && ++times > 2 && data.sync !== false) {
+	if (false) {
 		try {
 			const response = await client.mutate({
 				mutation: gql`mutation setCart($data: String!, $brandId: String!) {
@@ -89,7 +89,7 @@ cart.subscribe(async (data) => {
 					data: JSON.stringify({
 						id: data.id,
 						products: data.products.map((product) => ({
-							priceId: product.priceId,
+							variantSlug: product.variantSlug,
 							quantity: product.quantity,
 						})),
 					}),
