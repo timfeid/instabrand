@@ -84,6 +84,12 @@
     {variant.availability === 'SoldOut' ? 'Sold Out' : (inCart ? 'Update cart' : 'Add to Cart')}
   </button>
 
+  {#if inCart && variant.availability !== 'SoldOut'}
+    <a href="/checkout" class="border border-brand-primary uppercase py-2 px-4 tracking-wide ml-2">
+      Check Out
+    </a>
+  {/if}
+
   <div class={theme(`${themeName}.addToCart.shippingDateContainer`, 'uppercase mt-4')}>
     Ships on
     <span class={theme(`${themeName}.addToCart.shippingDate`)}>
