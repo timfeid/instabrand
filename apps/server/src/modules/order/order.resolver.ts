@@ -1,8 +1,8 @@
-import { Resolver } from 'type-graphql'
+import { FieldResolver, Resolver, Root } from 'type-graphql'
 import Container, { Service } from 'typedi'
 import { CustomerService } from '../customer/customer.service'
 import { Order } from './order.schema'
-import { OrderService } from './order.service'
+import { OrderService, OrderServiceReturnType } from './order.service'
 
 const formatter = Intl.NumberFormat('en-US', { currency: 'USD', style: 'currency' })
 
@@ -14,5 +14,16 @@ export class OrderResolver {
     private readonly customerService: CustomerService,
   ) {
     this.orderService = Container.get(OrderService)
+  }
+
+  @FieldResolver()
+  subtotal(@Root() root: OrderServiceReturnType) {
+    const subtotal = this.orderService.getSubtotal(root)
+    const formatter = new Intl.NumberFormat('en-us', {
+      style: 'currency',
+      currency: 'USD',
+    })
+
+    return formatter.format(subtotal / 100)
   }
 }

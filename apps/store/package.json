@@ -32,6 +32,10 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@apollo/client": "^3.7.10"
+		"@apollo/client": "^3.7.10",
+		"@lottiefiles/svelte-lottie-player": "^0.3.0",
+		"@poppanator/sveltekit-svg": "^3.0.0",
+		"svelte-select": "^5.5.2",
+		"yup": "^1.0.2"
 	}
 }

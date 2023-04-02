@@ -53,13 +53,11 @@ export class ProductResolver {
   @Query(returns => ProductResponse)
   async product(@Ctx() ctx: Context, @Args() args: GetProduct) {
     const product = await this.productService.findBySlug(args.slug, args.brandId)
-    const { types, variant } = await this.variantService.getVariant(
+    const { types, variant } = await this.variantService.getVariantWithTypes(
       args.variantSlug,
       ['size', 'color', 'material', 'style'],
       product.variants,
     )
-
-    console.log(JSON.stringify(product.variants, null, 2))
 
     return {
       product,

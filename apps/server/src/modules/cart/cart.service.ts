@@ -1,103 +1,27 @@
-import { Order, PrismaClient, OrderStatus } from '@instabrand/data'
+import { OrderStatus, PrismaClient } from '@prisma/client'
 import { Service } from 'typedi'
 import { ulid } from 'ulidx'
-
-type CartProduct = {
-  priceId: string
-  quantity: number
-}
-
-type CreateCartArgs = {
-  brandId: string
-  userId: string | null
-  products: CartProduct[]
-}
+import { LineItemService } from '../line-item/line-item.service'
+import { OrderDetails, OrderService } from '../order/order.service'
+import { SetCartArgs } from './cart.schemas'
 
 @Service()
 export class CartService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly orderService: OrderService,
+    private readonly prisma: PrismaClient,
+    private readonly lineItemService: LineItemService,
+  ) {}
 
-  async getCart(id: string) {
-    return await this.prisma.order.findFirst({
-      where: {
-        id,
-      },
-      include: {
-        customer: {
-          include: {
-            address: {
-              include: {
-                state: true,
-              },
-            },
-          },
-        },
-        orderProducts: {
-          include: {
-            price: {
-              include: {
-                product: true,
-              },
-            },
-          },
-        },
-      },
-    })
+  protected toCreateOrder(cart: SetCartArgs): OrderDetails {
+    return { ...cart, status: OrderStatus.cart }
   }
 
-  async createCart(args: CreateCartArgs) {
-    console.log('creating cart!')
-    const prettyId = await this.prisma.order.count({
-      where: {
-        brandId: args.brandId,
-      },
-    })
+  async setCart(cart: SetCartArgs) {
+    if (cart.id) {
+      return await this.orderService.updateOrder(cart.id, this.toCreateOrder(cart))
+    }
 
-    const order = await this.prisma.order.create({
-      data: {
-        id: ulid(),
-        prettyId,
-        statusId: OrderStatus.cart,
-        userId: args.userId,
-        brandId: args.brandId,
-      },
-    })
-
-    await this.syncProducts(order, args.products)
-
-    return this.getCart(order.id)
-  }
-
-  async updateCart(id: string, args: CreateCartArgs) {
-    console.log('updating cart', id)
-    const order = await this.prisma.order.update({
-      where: {
-        id,
-      },
-      data: {
-        userId: args.userId,
-      },
-    })
-
-    await this.syncProducts(order, args.products)
-    return this.getCart(order.id)
-  }
-
-  async syncProducts(order: Order, products: CartProduct[]) {
-    await this.prisma.orderProduct.deleteMany({
-      where: {
-        orderId: order.id,
-      },
-    })
-    await this.prisma.orderProduct.createMany({
-      data: products.map(product => {
-        return {
-          id: ulid(),
-          orderId: order.id,
-          quantity: product.quantity,
-          priceId: product.priceId,
-        }
-      }),
-    })
+    return await this.orderService.createOrder(this.toCreateOrder(cart))
   }
 }

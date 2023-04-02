@@ -1,23 +1,23 @@
 import { writable, get } from 'svelte/store';
-import { deliveryMethods } from './checkout';
 import { brand } from './brand';
 import { client } from '../request';
 import { gql } from '@apollo/client';
 import { cartFragment } from '../fragments/cart.fragment';
+import { browser } from '$app/environment';
 
 export const defaultCart: Cart = {
-	products: [],
+	lineItems: [],
 	id: '',
 	sync: false,
 };
 
-type CartProduct = {
-	variantSlug: string;
+type LineItem = {
+	variant: { id: string };
 	quantity: number;
 };
 
 export type Cart = {
-	products: CartProduct[];
+	lineItems: LineItem[];
 	id: string | null;
 	sync: boolean;
 };
@@ -25,35 +25,35 @@ export type Cart = {
 export const cart = writable<Cart>({ ...defaultCart });
 
 export const setCartProduct = (
-	variantSlug: string,
+	variantId: string,
 	quantity: number,
 	replace: string | false = false,
 ) => {
 	cart.update((cart) => {
-		const products = [...cart.products];
+		const lineItems = [...cart.lineItems];
 
-		if (replace && replace !== variantSlug) {
-			const replaceIndex = products.findIndex((product) => product.variantSlug === replace);
+		if (replace && replace !== variantId) {
+			const replaceIndex = lineItems.findIndex((product) => product.variant.id === replace);
 			if (replaceIndex !== -1) {
-				products.splice(replaceIndex, 1);
+				lineItems.splice(replaceIndex, 1);
 			}
 		}
 
-		const productIndex = products.findIndex((product) => product.variantSlug === variantSlug);
+		const productIndex = lineItems.findIndex((product) => product.variant.id === variantId);
 
 		if (productIndex >= 0) {
 			if (quantity === 0) {
-				products.splice(productIndex, 1);
+				lineItems.splice(productIndex, 1);
 			} else if (!replace) {
-				products[productIndex].quantity += quantity;
+				lineItems[productIndex].quantity += quantity;
 			} else {
-				products[productIndex].quantity = quantity;
+				lineItems[productIndex].quantity = quantity;
 			}
 		} else if (quantity > 0) {
-			products.push({ variantSlug, quantity });
+			lineItems.push({ variant: { id: variantId }, quantity });
 		}
 
-		cart.products = products;
+		cart.lineItems = lineItems;
 		cart.sync = true;
 
 		return cart;
@@ -62,13 +62,13 @@ export const setCartProduct = (
 
 export const cartTotalProducts = writable(0);
 
-const times = 0;
+let times = 0;
 
 cart.subscribe(async (data) => {
 	let total = 0;
 	const brandId = get(brand)?.id;
 
-	for (const product of data.products) {
+	for (const product of data.lineItems) {
 		total += product.quantity;
 	}
 
@@ -76,32 +76,27 @@ cart.subscribe(async (data) => {
 
 	// first time is on subscribe
 	// second time is setting from session
-	if (false) {
+	if (browser && ++times > 1 && data.sync !== false) {
 		try {
 			const response = await client.mutate({
-				mutation: gql`mutation setCart($data: String!, $brandId: String!) {
+				mutation: gql`
 					${cartFragment}
-					setCart(data: $data, brandId: $brandId) {
-						...Cart
+					mutation setCart($id: String, $lineItems: [SetCartItem]!, $brandId: String!) {
+						setCart(id: $id, lineItems: $lineItems, brandId: $brandId) {
+							...Cart
+						}
 					}
-				}`,
+				`,
 				variables: {
-					data: JSON.stringify({
-						id: data.id,
-						products: data.products.map((product) => ({
-							variantSlug: product.variantSlug,
-							quantity: product.quantity,
-						})),
+					id: data.id,
+					lineItems: data.lineItems.map((li) => {
+						return { variantId: li.variant.id, quantity: li.quantity };
 					}),
 					brandId,
 				},
+				fetchPolicy: 'network-only',
 			});
-
-			const setCart = response.data;
-
-			console.log(setCart);
-			cart.set({ ...setCart.invoice, sync: false });
-			deliveryMethods.set(setCart.deliveryMethods);
+			cart.set({ ...response.data.setCart.order, sync: false });
 		} catch (e) {
 			console.log(e);
 		}

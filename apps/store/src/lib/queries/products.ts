@@ -77,6 +77,7 @@ export async function getProduct(
 					product(slug: $slug, brandId: $brandId, variantSlug: $variantSlug) {
 						product {
 							id
+							description
 							name
 							slug
 							images {
@@ -114,7 +115,7 @@ export async function getProduct(
 				brandId: get(brand).id,
 				variantSlug,
 			},
-			fetchPolicy: invalidate ? 'network-only' : 'cache-first',
+			fetchPolicy: 'network-only',
 		});
 
 		return response.data.product;

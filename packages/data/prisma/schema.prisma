@@ -72,7 +72,6 @@ model User {
 
   brands   Brand[]   @relation("brand_user")
   customer Customer?
-  orders   Order[]
 
   @@map("users")
 }
@@ -168,30 +167,30 @@ model Variant {
 
   product Product @relation(fields: [productId], references: [id])
 
-  createdAt     DateTime       @default(now()) @map("created_at")
-  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at")
-  deletedAt     DateTime?      @map("deleted_at")
-  orderVariants OrderVariant[]
-  inventories   Inventory[]
-  images        VariantImage[]
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime?      @map("deleted_at")
+  lines       LineItem[]
+  inventories Inventory[]
+  images      VariantImage[]
 
   @@unique([slug, productId])
   @@map("variants")
 }
 
-model OrderVariant {
+model LineItem {
   id        String   @id
-  priceId   String   @map("price_id")
+  variantId String   @map("variant_id")
   orderId   String   @map("order_id")
   quantity  Int
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  variant   Variant @relation(fields: [priceId], references: [id])
+  variant   Variant @relation(fields: [variantId], references: [id])
   order     Order   @relation(fields: [orderId], references: [id])
   productId String?
 
-  @@map("order_variants")
+  @@map("lines_items")
 }
 
 model OrderAttempt {
@@ -276,14 +275,14 @@ model OrderStatusUpdate {
 model Order {
   id                    String      @id
   prettyId              Int         @map("pretty_id")
-  customerId            String      @map("customer_id")
+  customerId            String?     @map("customer_id")
   brandId               String      @map("brand_id")
   billingAddressId      String?     @map("billing_address_id")
   shippingAddressId     String?     @map("shipping_address_id")
   createdAt             DateTime    @default(now()) @map("created_at")
   updatedAt             DateTime    @updatedAt @map("updated_at")
   deletedAt             DateTime?   @map("deleted_at")
-  orderStatus           OrderStatus @map("order_status")
+  status                OrderStatus @map("order_status")
   paidAt                DateTime?   @map("paid_at")
   dueAt                 DateTime?   @map("due_at")
   discount              Int?
@@ -294,12 +293,10 @@ model Order {
   brand           Brand          @relation(fields: [brandId], references: [id])
   billingAddress  Address?       @relation(name: "billingAddress", fields: [billingAddressId], references: [id])
   shippingAddress Address?       @relation(name: "shippingAddress", fields: [shippingAddressId], references: [id])
-  customer        Customer       @relation(fields: [customerId], references: [id])
+  customer        Customer?      @relation(fields: [customerId], references: [id])
 
   orderAttempts OrderAttempt[]
-  User          User?          @relation(fields: [userId], references: [id])
-  userId        String?
-  OrderVariant  OrderVariant[]
+  lineItems     LineItem[]
 
   @@map("orders")
 }

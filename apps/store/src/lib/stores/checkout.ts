@@ -1,7 +1,6 @@
 import { writable } from 'svelte/store';
 
 const defaultCheckout: Checkout = {
-	deliveryMethod: 'delivery',
 	customer: {
 		firstName: '',
 		lastName: '',
@@ -17,12 +16,6 @@ const defaultCheckout: Checkout = {
 	},
 	currentStep: 0,
 	state: 'idle',
-};
-
-type DeliveryMethod = {
-	name: string;
-	disabled: boolean;
-	disabledReason?: string;
 };
 
 export type Address = {
@@ -41,7 +34,6 @@ export type Customer = {
 };
 
 export type Checkout = {
-	deliveryMethod: 'pickup' | 'delivery';
 	address: Address;
 	customer: Customer;
 	currentStep: number;
@@ -49,7 +41,6 @@ export type Checkout = {
 };
 
 export const checkout = writable<Checkout>({ ...defaultCheckout });
-export const deliveryMethods = writable<DeliveryMethod[]>([]);
 
 export const nextStep = () => {
 	checkout.update((data) => ({

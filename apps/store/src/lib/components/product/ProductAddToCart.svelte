@@ -1,99 +1,55 @@
 <script lang="ts">
-	import { theme } from "../../stores/brand";
-	import { cart, setCartProduct, type Cart } from "../../stores/cart";
-	import type { Variant } from "../../../../../server/src/modules/variant/variant.schemas";
-	import { get } from "svelte/store";
+	import { theme } from '../../stores/brand';
+	import { cart, setCartProduct } from '../../stores/cart';
+	import type { Variant } from '../../../../../server/src/modules/variant/variant.schemas';
+	import Checkout from '$lib/icons/ui/Checkout.svg?component';
+	import ProductQuantity from './ProductQuantity.svelte';
 
+	export let variant: Variant;
+	export let quantity: number = 1;
+	export let themeName: 'productCard' | 'productPage';
 
-  export let variant: Variant
-  export let themeName: 'productCard' | 'productPage'
+	let currentVariant = variant;
 
+	let inCart = false;
 
-  let currentVariant = variant
-  let lowestQuantity = 1
-  let quantity = 1
+	function addToCart() {
+		setCartProduct(currentVariant.id, quantity, currentVariant.id);
+	}
 
-  const changeQuantity = (val: number) => {
-    quantity = val + quantity
-    if (quantity < lowestQuantity) {
-      quantity = lowestQuantity
-    }
-  }
+	$: {
+		currentVariant = variant;
+		const i: any = $cart.lineItems.find((i) => {
+			return currentVariant.id === i.variant.id;
+		});
 
-  const addItemToCart = () => {
-    setCartProduct(variant.slug, quantity, variant.slug)
-
-    if (quantity === 0) {
-      lowestQuantity = 1
-      quantity = 1
-    }
-  }
-
-  let inCart = false
-
-  // const updateInCart = (cart: Cart) => {
-  //   const i: any = cart.products.find(i => {
-  //     console.log(variant.slug, i.variantSlug)
-  //     return variant.slug === i.variantSlug
-  //   })
-
-  //   inCart = !!i
-  //   if (inCart) {
-  //     quantity = i.quantity
-  //     lowestQuantity = 0
-  //   }
-
-  //   return inCart
-  // }
-
-  // cart.subscribe(updateInCart)
-
-  $: {
-    currentVariant = variant
-    console.log({currentVariant})
-    const i: any = $cart.products.find(i => {
-      console.log(currentVariant.slug, i.variantSlug)
-      return currentVariant.slug === i.variantSlug
-    })
-
-    inCart = !!i
-    if (inCart) {
-      quantity = i.quantity
-      lowestQuantity = 0
-    }
-  }
+		inCart = !!i;
+	}
 </script>
 
-<form on:submit|preventDefault={addItemToCart}>
+<form on:submit={addToCart} class="mt-4">
+	<button
+		class={theme(
+			`${themeName}.addToCard.button`,
+			'disabled:bg-gray-200 bg-brand-primary uppercase py-2 px-4 tracking-wide',
+		)}
+		disabled={variant.availability === 'SoldOut'}
+	>
+		{variant.availability === 'SoldOut' ? 'Sold Out' : inCart ? 'Update Cart' : 'Add to Cart'}
+	</button>
 
-  <div class={theme(`${themeName}.addToCart.quantityLabel`, 'text-sm')}>
-
-  {#if variant.availability !== 'SoldOut'}
-    <div class={theme(`${themeName}.addToCart.quantityLabel`, 'text-sm')}>
-      Quantity
-    </div>
-
-    <div class={theme(`${themeName}.addToCart.quantityButtonContainer`, 'flex py-2')}>
-      <div>{quantity}</div>
-      <button type="button" class={theme(`${themeName}.addToCart.quantityButton`, 'px-2')} on:click={() => changeQuantity(-1)}>-</button>
-      <button type="button" class={theme(`${themeName}.addToCart.quantityButton`, 'px-2')} on:click={() => changeQuantity(1)}>+</button>
-    </div>
-  {/if}
-
-  <button class={theme(`${themeName}.addToCard.button`, 'disabled:bg-gray-200 bg-brand-primary uppercase py-2 px-4 tracking-wide mt-4')} disabled={variant.availability === 'SoldOut'}>
-    {variant.availability === 'SoldOut' ? 'Sold Out' : (inCart ? 'Update cart' : 'Add to Cart')}
-  </button>
-
-  {#if inCart && variant.availability !== 'SoldOut'}
-    <a href="/checkout" class="border border-brand-primary uppercase py-2 px-4 tracking-wide ml-2">
-      Check Out
-    </a>
-  {/if}
-
-  <div class={theme(`${themeName}.addToCart.shippingDateContainer`, 'uppercase mt-4')}>
-    Ships on
-    <span class={theme(`${themeName}.addToCart.shippingDate`)}>
-      2024
-    </span>
-  </div>
+	{#if inCart && variant.availability !== 'SoldOut'}
+		<a
+			href="/checkout"
+			class="inline-block bg-black text-white uppercase py-2 px-4 tracking-wide ml-2"
+		>
+			<Checkout width={16} height={16} class="mt-[-2px] mr-[2px] inline-block fill-brand-primary" />
+			Check Out
+		</a>
+	{/if}
 </form>
+
+<div class={theme(`${themeName}.addToCart.shippingDateContainer`, 'uppercase mt-4')}>
+	Ships on
+	<span class={theme(`${themeName}.addToCart.shippingDate`)}> 2024 </span>
+</div>

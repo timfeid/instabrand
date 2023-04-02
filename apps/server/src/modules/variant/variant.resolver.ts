@@ -5,13 +5,17 @@ import { Context } from 'koa'
 import { Variant } from './variant.schemas'
 import { VariantService } from './variant.service'
 import { ProductAvailability, ProductPrice } from '../product/product.schemas'
+import { ImagePresenter } from '../image/image.presenter'
 
 const intl = Intl.NumberFormat('us')
 
 @Resolver(Variant)
 @Service()
 export class VariantResolver {
-  constructor(private readonly variantService: VariantService) {}
+  constructor(
+    private readonly variantService: VariantService,
+    private readonly imagePresenter: ImagePresenter,
+  ) {}
 
   @Query(() => [Variant])
   async variants(@Arg('ids', () => [String]) ids: string[]) {
@@ -42,5 +46,18 @@ export class VariantResolver {
   @FieldResolver()
   availability() {
     return ProductAvailability.InStock
+  }
+
+  @FieldResolver()
+  image(@Root() root: any) {
+    const image = root.product.images[0]?.image
+
+    return image ? this.imagePresenter.present(image, root.product.name) : null
+  }
+
+  @FieldResolver()
+  images() {
+    // TODO this
+    return []
   }
 }

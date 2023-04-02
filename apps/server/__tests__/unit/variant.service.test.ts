@@ -54,7 +54,7 @@ describe('variants', () => {
 
   it('gets the types with their valid variants 0', async () => {
     const shirtXL = { ...shirtXLBlack, color: null }
-    const response = await Container.get(VariantService).getVariant(
+    const response = await Container.get(VariantService).getVariantWithTypes(
       shirtXLBlack.slug,
       ['size', 'color', 'material', 'style'],
       [shirtXL, { ...shirtMDBlack, color: null }, { ...shirtLGBlack, color: null }],
@@ -93,7 +93,7 @@ describe('variants', () => {
   })
 
   it('gets the types with their valid variants 1', async () => {
-    const response = await Container.get(VariantService).getVariant(
+    const response = await Container.get(VariantService).getVariantWithTypes(
       shirtXLBlack.slug,
       ['size', 'color', 'material', 'style'],
       [shirtXLBlack, shirtMDBlack, shirtLGBlack, shirtXLGreen, shirtMDGreen, shirtLGGreen],
@@ -150,7 +150,7 @@ describe('variants', () => {
   })
 
   it('gets the types with their valid variants 2', async () => {
-    const response = await Container.get(VariantService).getVariant(
+    const response = await Container.get(VariantService).getVariantWithTypes(
       shirtMDGreen.slug,
       ['size', 'color', 'material', 'style'],
       [shirtXLBlack, shirtMDBlack, shirtLGBlack, shirtXLGreen, shirtMDGreen, shirtLGGreen],
@@ -279,7 +279,7 @@ describe('variants', () => {
       material: 'Wool',
     }
 
-    const response = await Container.get(VariantService).getVariant(
+    const response = await Container.get(VariantService).getVariantWithTypes(
       shirtLGBlackWool.slug,
       ['color', 'size', 'material', 'style'],
       [

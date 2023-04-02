@@ -10,11 +10,11 @@ type ProductTheme = {
 	label?: string;
 	labelContainer?: string;
 	descriptionContainer?: string;
-	addToCard?: {
+	addToCart?: {
 		button?: string;
 		quantityButtonContainer?: string;
 		quantityButton?: string;
-		quantityLabel?: string;
+		label?: string;
 	};
 	// addToCard?: Partial<Record<ProductAvailability, string>>;
 };
@@ -57,6 +57,9 @@ export const donut: Brand = {
 			label: 'bg-black text-sm text-brand-primary px-4 py-1 w-fit',
 			labelContainer: '',
 			priceActual: 'text-4xl',
+			addToCart: {
+				label: 'lowercase mb-1',
+			},
 		},
 	},
 };

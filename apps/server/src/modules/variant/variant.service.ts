@@ -24,24 +24,29 @@ export class VariantService {
         product: {
           include: {
             brand: true,
+            images: true,
           },
         },
       },
     })
   }
 
-  async getVariant(
+  async getVariant(id: string) {
+    return await this.prisma.variant.findFirst({ where: { id } })
+  }
+
+  async getVariantWithTypes(
     selectedVariantSlug: string | null,
     typeNames: string[],
     allVariants: Variant[],
   ) {
     if (!selectedVariantSlug) {
-      selectedVariantSlug = allVariants[0].slug
+      selectedVariantSlug = allVariants[0].id
     }
     const selectedVariant = allVariants.find(variant => variant.slug === selectedVariantSlug)
 
     if (!selectedVariant) {
-      return this.getVariant(allVariants[0].slug, typeNames, allVariants)
+      return this.getVariantWithTypes(allVariants[0].slug, typeNames, allVariants)
     }
 
     const filterByType = (variant: Variant, filterTypes: string[], currentType: string) =>

@@ -2,40 +2,38 @@ import { gql } from '@apollo/client';
 
 export const cartFragment = gql`
 	fragment Cart on Cart {
-		deliveryMethods {
-			name
-			disabled
-			disabledReason
-		}
 		order {
 			id
-			orderStatus
-			salesTax
-			subtotal
-			total
-			items {
-				priceId
-				pricePer
+			lineItems {
 				quantity
-				totalPrice
-				weight
-				item {
+				variant {
+					id
+					price {
+						actual
+						compareAt
+					}
 					slug
-					name
-					image
-					lineage {
-						name
+					size
+					color
+					material
+					style
+					image {
+						alt
+						src
+						srcset
+						pictureSources {
+							srcset
+							media
+						}
 					}
-					brand {
+					product {
 						name
-					}
-					prices {
-						id
-						price
-						weight
+						slug
 					}
 				}
 			}
+
+			subtotal
 		}
 	}
 `;
