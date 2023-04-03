@@ -6,6 +6,7 @@ import { ulid } from 'ulidx'
 import { AddressService } from '../address/address.service'
 import { Repository, RepositoryFindOptions } from '../connection/repository'
 import { AddressInput } from '../address/address.schema'
+import Stripe from 'stripe'
 
 @ArgsType()
 export class CreateCustomer {
@@ -40,7 +41,45 @@ export class CustomerService implements Repository<CustomerServiceReturnType, Cu
   constructor(
     private readonly addressService: AddressService,
     private readonly prisma: PrismaClient,
+    private readonly stripe: Stripe,
   ) {}
+
+  async assignStripeCustomerId(customer: CustomerServiceReturnType) {
+    const stripeId = await this.createStripeId({
+      ...customer,
+      address: {
+        ...customer.address,
+        state: customer.address.state.name,
+      },
+    })
+
+    await this.prisma.customer.update({
+      where: { id: customer.id },
+      data: {
+        stripeId,
+      },
+    })
+
+    return stripeId
+  }
+
+  private async createStripeId(data: CreateCustomer) {
+    const { id } = await this.stripe.customers.create({
+      name: `${data.firstName} ${data.lastName}`,
+      email: data.email,
+      phone: data.phone,
+      address: {
+        city: data.address.city,
+        country: 'US',
+        line1: data.address.line1,
+        line2: data.address.line2,
+        postal_code: data.address.zip,
+        state: data.address.state,
+      },
+    })
+
+    return id
+  }
 
   async find({ skip, take }: RepositoryFindOptions, args: CustomerArgs) {
     return await this.prisma.customer.findMany({
@@ -145,6 +184,7 @@ export class CustomerService implements Repository<CustomerServiceReturnType, Cu
         userId: data.userId,
         brandId: data.brandId,
         addressId: address?.id,
+        stripeId: await this.createStripeId(data),
       },
     })
 

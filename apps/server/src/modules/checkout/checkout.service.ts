@@ -28,16 +28,26 @@ export class CheckoutService {
       console.log('succeeeeded')
     }
 
+    const createData = {
+      brandId: order.brandId,
+      firstName: args.customer.firstName,
+      lastName: args.customer.lastName,
+      address: args.address,
+      email: args.customer.email,
+      phone: args.customer.phone,
+    }
     const customer =
       (await this.customerService.findOne({ email: args.customer.email }, order.brandId)) ||
-      (await this.customerService.create({
-        brandId: order.brandId,
-        firstName: args.customer.firstName,
-        lastName: args.customer.lastName,
-        address: args.address,
-        email: args.customer.email,
-        phone: args.customer.phone,
-      }))
+      (await this.customerService.create(createData))
+    let stripeId = customer.stripeId
+
+    if (!stripeId) {
+      stripeId = await this.customerService.assignStripeCustomerId(customer)
+    }
+
+    await this.stripe.paymentIntents.update(intent.id, {
+      customer: stripeId,
+    })
 
     await this.orderService.updateOrder(order.id, {
       customerId: customer.id,
