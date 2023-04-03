@@ -44,8 +44,10 @@ model Customer {
   id        String    @id
   email     String    @unique
   phone     String
+  password  String?
   firstName String    @map("first_name")
   lastName  String    @map("last_name")
+  brandId   String    @map("brand_id")
   userId    String?   @map("user_id")
   addressId String?   @map("address_id")
   createdAt DateTime  @default(now()) @map("created_at")
@@ -53,10 +55,11 @@ model Customer {
   deletedAt DateTime? @map("deleted_at")
 
   address Address? @relation(fields: [addressId], references: [id])
-  user    User?    @relation(fields: [userId], references: [id])
 
   // carts    Cart[]
   Order Order[]
+  User  User[]
+  brand Brand   @relation(fields: [brandId], references: [id])
 
   @@unique([userId])
   @@map("customers")
@@ -70,8 +73,9 @@ model User {
   updatedAt DateTime  @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  brands   Brand[]   @relation("brand_user")
-  customer Customer?
+  brands     Brand[]   @relation("brand_user")
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
 
   @@map("users")
 }
@@ -321,6 +325,7 @@ model Brand {
   orderTemplate OrderTemplate[]
   users         User[]          @relation("brand_user")
   // carts           Cart[]
+  customer      Customer[]
 
   // @@unique([domainName, isSubDomain])
   @@map("brands")

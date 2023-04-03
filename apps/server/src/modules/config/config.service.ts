@@ -11,7 +11,7 @@ export class ConfigService {
   }
 
   get stripeKey() {
-    return this.env.STRIPE_KEY || ''
+    return this.env.STRIPE_SECRET || ''
   }
 
   get jwtPublicKey() {

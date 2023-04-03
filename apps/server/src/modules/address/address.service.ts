@@ -34,7 +34,7 @@ export class AddressService {
         ${data.city},
         ${state.id},
         ${data.zip},
-        ST_SetSRID(ST_MakePoint(${data.lng}, ${data.lat}), 4326)
+        ST_SetSRID(ST_MakePoint(${52}, ${21}), 4326)
       )
     `
 

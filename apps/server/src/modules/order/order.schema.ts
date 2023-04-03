@@ -12,3 +12,12 @@ export class Order {
   @Field()
   subtotal: string
 }
+
+@ObjectType()
+export class PaymentIntent {
+  @Field()
+  id: string
+
+  @Field()
+  secret: string
+}

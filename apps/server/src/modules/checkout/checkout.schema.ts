@@ -18,9 +18,6 @@ export class CheckoutCustomer {
 
 @InputType()
 export class CheckoutInput {
-  @Field()
-  deliveryMethod: string
-
   @Field(() => CheckoutCustomer)
   customer: CheckoutCustomer
 

@@ -37,10 +37,12 @@ export type Brand = {
 	id: string;
 	name: string;
 	theme: Theme;
+	color: string;
 };
 
 export const donut: Brand = {
 	id: '01GWT4W42WH4FFERNG1APADG6Z',
+	color: '#fcd510',
 	name: 'Donut Media',
 	theme: {
 		product: {

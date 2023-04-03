@@ -12,17 +12,9 @@ export class CheckoutResolver {
   async checkout(
     @Ctx() ctx,
     @Arg('data') data: CheckoutInput,
-    @Arg('providerId') providerId: string,
+    @Arg('paymentIntentId') paymentIntentId: string,
   ) {
     const user = ctx.user
-    if (ctx.session.cart && ctx.session.cart[providerId]) {
-      await this.checkoutService.checkout(ctx.session.cart[providerId].id, data, user)
-
-      ctx.session.cart[providerId] = undefined
-
-      return true
-    }
-
-    return false
+    await this.checkoutService.checkout(paymentIntentId, data)
   }
 }

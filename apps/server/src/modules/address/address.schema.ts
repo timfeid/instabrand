@@ -58,9 +58,9 @@ export class AddressInput extends AddressBase {
   @Field()
   state: string
 
-  @Field(() => Float)
-  lng: number
+  // @Field(() => Float)
+  // lng: number
 
-  @Field(() => Float)
-  lat: number
+  // @Field(() => Float)
+  // lat: number
 }

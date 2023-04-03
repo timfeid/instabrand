@@ -1,6 +1,7 @@
 import { Customer, PrismaClient, OrderStatus } from '@instabrand/data'
+import Stripe from 'stripe'
 import { Service } from 'typedi'
-import { CustomerService } from '../customer/customer.service'
+import { CreateCustomer, CustomerService } from '../customer/customer.service'
 import { OrderService } from '../order/order.service'
 import { UserService } from '../user/user.service'
 import { CheckoutInput } from './checkout.schema'
@@ -12,7 +13,35 @@ export class CheckoutService {
     private readonly userService: UserService,
     private readonly customerService: CustomerService,
     private readonly prisma: PrismaClient,
+    private readonly stripe: Stripe,
   ) {}
 
-  async checkout(orderId: string, data: CheckoutInput, customer: Customer) {}
+  async checkout(stripePaymentIntentId: string, args: CheckoutInput) {
+    const order = await this.orderService.findBy({ stripePaymentIntentId })
+    if (!order) {
+      throw new Error('Unable to find the order attached to this payment intent')
+    }
+
+    const intent = await this.stripe.paymentIntents.retrieve(stripePaymentIntentId)
+
+    if (intent.status === 'succeeded') {
+      console.log('succeeeeded')
+    }
+
+    const customer =
+      (await this.customerService.findOne({ email: args.customer.email }, order.brandId)) ||
+      (await this.customerService.create({
+        brandId: order.brandId,
+        firstName: args.customer.firstName,
+        lastName: args.customer.lastName,
+        address: args.address,
+        email: args.customer.email,
+        phone: args.customer.phone,
+      }))
+
+    await this.orderService.updateOrder(order.id, {
+      customerId: customer.id,
+      status: OrderStatus.waiting_shipping,
+    })
+  }
 }

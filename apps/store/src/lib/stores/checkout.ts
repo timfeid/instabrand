@@ -52,3 +52,10 @@ export const nextStep = () => {
 checkout.subscribe((data) => {
 	console.log('subscribe data', data);
 });
+
+export function setState(state: 'loading' | 'idle' | 'success') {
+	checkout.update((data) => ({
+		...data,
+		state,
+	}));
+}

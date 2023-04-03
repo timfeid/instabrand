@@ -25,6 +25,7 @@ export class CreateCustomer {
   phone: string
 
   userId?: string
+  brandId: string
 }
 
 type CustomerServiceReturnType = Customer & {
@@ -68,7 +69,6 @@ export class CustomerService implements Repository<CustomerServiceReturnType, Cu
 
     const customer = await this.prisma.customer.findFirst({
       include: {
-        user: true,
         address: {
           include: {
             state: true,
@@ -76,13 +76,7 @@ export class CustomerService implements Repository<CustomerServiceReturnType, Cu
         },
       },
       where: {
-        user: {
-          brands: {
-            some: {
-              id: brandId,
-            },
-          },
-        },
+        brandId,
         ...where,
       },
     })
@@ -105,13 +99,7 @@ export class CustomerService implements Repository<CustomerServiceReturnType, Cu
 
     if (args) {
       if (args.brandId) {
-        wheres.user = {
-          brands: {
-            some: {
-              id: args.brandId,
-            },
-          },
-        }
+        wheres.brandId = args.brandId
       }
       if (args.search) {
         wheres.OR = [
@@ -155,6 +143,7 @@ export class CustomerService implements Repository<CustomerServiceReturnType, Cu
         email: data.email,
         phone: data.phone,
         userId: data.userId,
+        brandId: data.brandId,
         addressId: address?.id,
       },
     })

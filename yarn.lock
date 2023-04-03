@@ -3087,6 +3087,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@stripe/stripe-js@npm:^1.46.0":
+  version: 1.52.0
+  resolution: "@stripe/stripe-js@npm:1.52.0"
+  checksum: af6b17ad911d093c2e390a16f0ac032060f69d750ddb248325b199f563aba61bd0268029a11c7257294f68691cd8340adc1586127dec8ef85f043e2091805a88
+  languageName: node
+  linkType: hard
+
 "@sveltejs/adapter-auto@npm:^2.0.0":
   version: 2.0.0
   resolution: "@sveltejs/adapter-auto@npm:2.0.0"
@@ -7906,6 +7913,9 @@ __metadata:
 "instabrand@workspace:.":
   version: 0.0.0-use.local
   resolution: "instabrand@workspace:."
+  dependencies:
+    stripe: ^11.17.0
+    svelte-stripe: ^0.0.22
   languageName: unknown
   linkType: soft
 
@@ -11917,6 +11927,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stripe@npm:^11.17.0":
+  version: 11.17.0
+  resolution: "stripe@npm:11.17.0"
+  dependencies:
+    "@types/node": ">=8.1.0"
+    qs: ^6.11.0
+  checksum: 0fd7aced87681cb23266f7c16a0a4b194f34897afa71157e1e93d5c111da675be726f81e32ba1157b7327c6f59265e94e9152f18ea379dea885e71a773b71e73
+  languageName: node
+  linkType: hard
+
 "stripe@npm:^11.9.1":
   version: 11.16.0
   resolution: "stripe@npm:11.16.0"
@@ -12128,6 +12148,15 @@ __metadata:
     "@floating-ui/dom": ^1.2.1
     svelte-floating-ui: 1.2.8
   checksum: 124a3808c9cb86f88a5eb433466783ef39eaa49bc6f0a12ff16cb67cbb39ce261b43d42fbfdcb5a8b3379a7fb1daf3d5f4e4a207d8d775aed8863d38c171c3d8
+  languageName: node
+  linkType: hard
+
+"svelte-stripe@npm:^0.0.22":
+  version: 0.0.22
+  resolution: "svelte-stripe@npm:0.0.22"
+  dependencies:
+    "@stripe/stripe-js": ^1.46.0
+  checksum: bc8a92f9c8771bcb42e0a60ec14cc1684ba75a71ca3bdf15e3bfcee16c9156dfc6e0c8b1936d7b6c743526f66e3706454ce2e1dd86f16b437a8bc13848215192
   languageName: node
   linkType: hard
 
