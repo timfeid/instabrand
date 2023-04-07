@@ -1,0 +1,22 @@
+[workspace]
+members = [
+    "apps/fast",
+    "prisma"
+]
+resolver = "2"
+default-members = ["apps/fast"]
+
+[workspace.dependencies]
+prisma-client-rust-cli = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.7", features = [
+  "postgresql",
+  "rspc",
+  "migrations",
+  "mocking",
+], default-features = false }
+prisma-client-rust = { git = "https://github.com/Brendonovich/prisma-client-rust", tag = "0.6.7", features = [
+  "postgresql",
+  "rspc",
+  "migrations",
+  "mocking",
+], default-features = false }
+rspc = { version = "0.1.2", features = ["axum"] }

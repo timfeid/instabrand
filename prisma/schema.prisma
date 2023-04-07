@@ -1,0 +1,359 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "cargo prisma"
+  output   = "../apps/fast/src/prisma.rs"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model State {
+  id           Int       @id @default(autoincrement())
+  name         String    @unique
+  abbreviation String    @unique @db.VarChar(2)
+  Address      Address[]
+
+  @@map("states")
+}
+
+model Address {
+  id      String                               @id
+  line1   String
+  line2   String?
+  line3   String?
+  stateId Int                                  @map("state_id")
+  zip     String
+  city    String
+  geom    Unsupported("geometry(Point, 4326)")
+
+  state State @relation(fields: [stateId], references: [id])
+
+  customers              Customer[]
+  orderByBillingAddress  Order[]    @relation("billingAddress")
+  orderByShippingaddress Order[]    @relation("shippingAddress")
+  Brand                  Brand[]
+
+  @@index([geom], name: "blockgroup_idx", type: Gist)
+  @@map("addresses")
+}
+
+model Customer {
+  id        String    @id
+  email     String    @unique
+  phone     String
+  password  String?
+  firstName String    @map("first_name")
+  lastName  String    @map("last_name")
+  brandId   String    @map("brand_id")
+  userId    String?   @map("user_id")
+  addressId String?   @map("address_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  stripeId  String?   @map("stripe_customer_id")
+
+  address Address? @relation(fields: [addressId], references: [id])
+
+  // carts    Cart[]
+  Order Order[]
+  User  User[]
+  brand Brand   @relation(fields: [brandId], references: [id])
+
+  @@unique([userId])
+  @@map("customers")
+}
+
+model User {
+  id       String @id
+  password String
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  brands     Brand[]   @relation("brand_user")
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+
+  @@map("users")
+}
+
+model Product {
+  id          String @id
+  name        String
+  description String @db.Text
+  slug        String
+
+  brandId String @map("brand_id")
+
+  brand    Brand     @relation(fields: [brandId], references: [id])
+  variants Variant[]
+
+  createdAt DateTime       @default(now()) @map("created_at")
+  updatedAt DateTime       @default(now()) @updatedAt @map("updated_at")
+  deletedAt DateTime?      @map("deleted_at")
+  images    ImageProduct[]
+
+  @@unique([brandId, slug])
+  @@map("products")
+}
+
+model InventoryLocation {
+  id   String @id
+  name String
+
+  @@map("inventory_location")
+}
+
+model Inventory {
+  inventoryLocationId String  @map("inventory_location_id")
+  variantId           String  @map("variant_id")
+  onHand              Int     @map("on_hand")
+  available           Int
+  sku                 String?
+  barcode             String?
+  isAllowedToOversell Boolean @default(false) @map("is_allowed_to_oversell")
+
+  variant Variant @relation(fields: [variantId], references: [id])
+
+  @@id([inventoryLocationId, variantId])
+  @@map("inventories")
+}
+
+model ImageProduct {
+  url       String
+  productId String @map("product_id")
+
+  product Product @relation(fields: [productId], references: [id])
+  image   Image   @relation(fields: [url], references: [url])
+
+  @@id([url, productId])
+  @@map("image_product")
+}
+
+model Image {
+  url          String         @id
+  url2x        String         @map("url_2x")
+  urlMobile    String         @map("url_mobile")
+  urlMobile2x  String         @map("url_mobile_2x")
+  urlTablet    String         @map("url_tablet")
+  urlTablet2x  String         @map("url_tablet_2x")
+  urlDesktop   String         @map("url_desktop")
+  urlDesktop2x String         @map("url_desktop_2x")
+  ImageProduct ImageProduct[]
+  VariantImage VariantImage[]
+}
+
+model VariantImage {
+  url       String
+  variantId String @map("variant_id")
+
+  variant Variant @relation(fields: [variantId], references: [id])
+  image   Image   @relation(fields: [url], references: [url])
+
+  @@id([url, variantId])
+}
+
+model Variant {
+  id        String @id
+  productId String @map("product_id")
+
+  slug     String
+  sku      String?
+  size     String?
+  color    String?
+  material String?
+  style    String?
+
+  priceInCents          Int  @map("price_in_cents")
+  compareAtPriceInCents Int? @map("compare_at_price_in_cents")
+  costInCents           Int  @map("cost_in_cents")
+
+  product Product @relation(fields: [productId], references: [id])
+
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime?      @map("deleted_at")
+  lines       LineItem[]
+  inventories Inventory[]
+  images      VariantImage[]
+
+  @@unique([slug, productId])
+  @@map("variants")
+}
+
+model LineItem {
+  id        String   @id
+  variantId String   @map("variant_id")
+  orderId   String   @map("order_id")
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  variant   Variant @relation(fields: [variantId], references: [id])
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String?
+
+  @@map("lines_items")
+}
+
+model OrderAttempt {
+  token       String    @id
+  orderId     String    @map("order_id")
+  type        OrderType
+  createdAt   DateTime  @default(now()) @map("created_at")
+  description String
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  orderPayments OrderPayments[]
+
+  @@map("order_attempts")
+}
+
+model Card {
+  id       String @id
+  cardType String @map("card_type")
+  last4    String
+  expYear  Int    @map("exp_year")
+  expMonth Int    @map("exp_month")
+
+  orderPayments OrderPayments[]
+
+  @@map("cards")
+}
+
+model OrderPayments {
+  stripeChargeId String  @id @map("stripe_chard_id")
+  attemptId      String? @map("attempt_id")
+  cardId         String? @map("card_id")
+  amount         Int
+
+  card    Card?         @relation(fields: [cardId], references: [id])
+  attempt OrderAttempt? @relation(fields: [attemptId], references: [token])
+
+  @@map("order_payments")
+}
+
+enum OrderType {
+  store_front
+  portal
+}
+
+model OrderTemplate {
+  id              String    @id
+  brandId         String    @map("brand_id")
+  name            String // Estimate Quote Bid Order
+  type            OrderType
+  displayName     String
+  showPhoneNumber Boolean   @default(true) @map("show_phone_number")
+  showEmail       Boolean   @default(true) @map("show_email")
+  showAddress     Boolean   @default(true) @map("show_address")
+  showWebsite     Boolean   @default(true) @map("show_website")
+
+  brand Brand @relation(fields: [brandId], references: [id])
+
+  order Order[]
+
+  @@map("order_templates")
+}
+
+enum OrderStatus {
+  cart
+  payment_failed
+  waiting_shipping
+  shipping
+  finished
+}
+
+model OrderStatusUpdate {
+  id                  String       @id
+  orderId             String       @map("order_id")
+  previousOrderStatus OrderStatus? @map("previous_order_status")
+  newOrderStatus      OrderStatus  @map("new_order_status")
+  createdAt           DateTime     @default(now()) @map("created_at")
+
+  @@map("order_status_updates")
+}
+
+model Order {
+  id                    String      @id
+  prettyId              Int         @map("pretty_id")
+  customerId            String?     @map("customer_id")
+  brandId               String      @map("brand_id")
+  billingAddressId      String?     @map("billing_address_id")
+  shippingAddressId     String?     @map("shipping_address_id")
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
+  deletedAt             DateTime?   @map("deleted_at")
+  status                OrderStatus @map("order_status")
+  paidAt                DateTime?   @map("paid_at")
+  dueAt                 DateTime?   @map("due_at")
+  discount              Int?
+  stripePaymentIntentId String?     @unique @map("stripe_payment_intent_id")
+  templateId            String?     @map("template_id")
+
+  template        OrderTemplate? @relation(fields: [templateId], references: [id])
+  brand           Brand          @relation(fields: [brandId], references: [id])
+  billingAddress  Address?       @relation(name: "billingAddress", fields: [billingAddressId], references: [id])
+  shippingAddress Address?       @relation(name: "shippingAddress", fields: [shippingAddressId], references: [id])
+  customer        Customer?      @relation(fields: [customerId], references: [id])
+
+  orderAttempts OrderAttempt[]
+  lineItems     LineItem[]
+
+  @@map("orders")
+}
+
+model Brand {
+  id        String    @id
+  name      String    @unique
+  // phone     String
+  // email     String
+  // domainName                 String    @map("domain_name")
+  // isSubDomain                Boolean   @default(true) @map("is_sub_domain")
+  logo      String?
+  color     String    @default("#000000")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+  addressId String    @map("address_id")
+
+  address       Address         @relation(fields: [addressId], references: [id])
+  products      Product[]
+  orders        Order[]
+  orderTemplate OrderTemplate[]
+  users         User[]          @relation("brand_user")
+  // carts           Cart[]
+  customer      Customer[]
+
+  // @@unique([domainName, isSubDomain])
+  @@map("brands")
+}
+
+// model CartItems {
+//   cartId  String @map("cart_id")
+//   priceId String @map("price_id")
+
+//   quantity Int
+
+//   @@id([cartId, priceId])
+// }
+
+// model Cart {
+//   id         String   @id
+//   customerId String?  @map("customer_id")
+//   providerId String   @map("provider_id")
+//   isComplete Boolean  @default(false) @map("is_complete")
+//   createdAt  DateTime @default(now()) @map("created_at")
+
+//   customer Customer? @relation(fields: [customerId], references: [id])
+//   provider Provider  @relation(fields: [providerId], references: [id])
+
+//   @@index([isComplete])
+//   @@index([createdAt])
+// }

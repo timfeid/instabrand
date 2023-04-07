@@ -1,0 +1,18 @@
+[package]
+name = "fast"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.64"
+publish = false
+
+[dependencies]
+tokio = { version = "1.21.2", features = ["rt-multi-thread", "macros", "signal"] }
+axum = "0.6.12"
+rspc = { workspace = true }
+prisma-client-rust = { workspace = true }
+dotenv = "0.15.0"
+tower-http = { version = "0.4.0", features = ["cors"] }
+serde = "1.0.159"
+
+[package.metadata.pkg-config]
+openssl = "3.0.8"
