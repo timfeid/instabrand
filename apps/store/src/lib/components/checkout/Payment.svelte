@@ -31,12 +31,14 @@
 			},
 			'.Input': {
 				padding: '12px',
+				border: '1px solid #232323',
 			},
 			'.Input:disabled, .Input--invalid:disabled': {
 				color: 'lightgray',
 			},
 			'.Tab': {
 				padding: '10px 12px 8px 12px',
+				backgroundColor: $brand.color,
 				border: 'none',
 			},
 			'.Tab:hover': {
@@ -44,8 +46,8 @@
 				boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 7px rgba(18, 42, 66, 0.04)',
 			},
 			'.Tab--selected, .Tab--selected:focus, .Tab--selected:hover': {
-				border: 'none',
-				backgroundColor: '#fff',
+				border: '2px solid black',
+				backgroundColor: $brand.color,
 				boxShadow:
 					'0 0 0 1.5px var(--colorPrimaryText), 0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 7px rgba(18, 42, 66, 0.04)',
 			},

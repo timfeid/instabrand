@@ -9,3 +9,8 @@ node_modules/
 yarn-error.log
 *jwt.*.key
 .env
+
+
+# Added by cargo
+
+/target
