@@ -7,22 +7,22 @@
   export let data: PageData
 
   let products = data.products.products
-  let pageInfo = data.products.pageInfo
+  // let pageInfo = data.products.pageInfo
   let loading = false
   // let variables
 
   $: {
     products = data.products.products
-    pageInfo = data.products.pageInfo
+    // pageInfo = data.products.pageInfo
   }
 
   function setData(response: {products: any[], pageInfo: any}) {
     products = response.products
-    pageInfo = response.pageInfo
+    // pageInfo = response.pageInfo
   }
 
   async function getMore() {
-    setData(await getProducts({after: pageInfo.after}))
+    // setData(await getProducts({after: pageInfo.after}))
   }
 
 

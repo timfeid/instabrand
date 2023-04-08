@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { theme } from '../../stores/brand';
 	import { cart, setCartProduct } from '../../stores/cart';
-	import type { Variant } from '../../../../../server/src/modules/variant/variant.schemas';
 	import Checkout from '$lib/icons/ui/Checkout.svg?component';
 	import ProductQuantity from './ProductQuantity.svelte';
+	import type { Variant } from '../../bindings';
 
 	export let variant: Variant;
 	export let quantity: number = 1;

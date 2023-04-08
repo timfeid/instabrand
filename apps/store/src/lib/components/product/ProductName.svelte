@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Product } from "../../bindings";
 	import { theme } from "../../stores/brand";
-  import type { Product } from "../../../../../server/src/modules/product/product.schemas"
 
   export let product: Product
   export let themeName: 'productCard' | 'productPage'

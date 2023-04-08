@@ -5,8 +5,8 @@
 	import ProductPrice from './product/ProductPrice.svelte';
 	import ProductName from './product/ProductName.svelte';
 	import ProductAvailability from './product/ProductAvailability.svelte';
-	import type { Product } from "../../../../server/src/modules/product/product.schemas"
 	import ProductLabel from './product/ProductLabel.svelte';
+	import type { Product } from '../bindings';
 
 	export let product: Product;
 
@@ -22,8 +22,8 @@
 <div>
 	<a {href} aria-label={product.name}>
 		<div class={theme('productCard.imageAndLabelContainer', "relative")}>
-			{#if product.primaryImage}
-				<Image image={product.primaryImage} />
+			{#if product.primary_image}
+				<Image image={product.primary_image} />
 			{/if}
 			<ProductLabel {...productData} />
 		</div>

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { Variant } from '../../../../../server/src/modules/variant/variant.schemas';
 	import { theme } from '../../stores/brand';
 	import { cart, setCartProduct } from '../../stores/cart';
 	import Plus from '$lib/icons/ui/Plus.svg?component';
 	import Minus from '$lib/icons/ui/Minus.svg?component';
+	import type { Variant } from '../../bindings';
 
 	export let variant: Variant;
 	export let themeName: 'productCard' | 'productPage';

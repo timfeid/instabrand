@@ -35,6 +35,8 @@
 		"@apollo/client": "^3.7.10",
 		"@lottiefiles/svelte-lottie-player": "^0.3.0",
 		"@poppanator/sveltekit-svg": "^3.0.0",
+		"@rspc/client": "^0.1.3",
+		"@tanstack/svelte-query": "^4.27.0",
 		"svelte-select": "^5.5.2",
 		"yup": "^1.0.2"
 	}

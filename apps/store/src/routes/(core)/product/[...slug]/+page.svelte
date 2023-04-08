@@ -6,8 +6,6 @@
 	import ProductAddToCart from '$lib/components/product/ProductAddToCart.svelte';
 	import type { PageData } from "./$types";
 	import ProductQuantity from '../../../../lib/components/product/ProductQuantity.svelte';
-	import { setCartProduct } from '../../../../lib/stores/cart';
-
 
   export let data: PageData
 

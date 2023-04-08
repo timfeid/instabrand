@@ -20,8 +20,7 @@ pub(crate) fn new() -> RouterBuilder<Ctx> {
             Config::new()
                 // Doing this will automatically export the bindings when the `build` function is called.
                 .export_ts_bindings(
-                    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                        .join("../fast-frontend/src/lib/bindings.ts"),
+                    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../store/src/lib/bindings.ts"),
                 ),
         )
         .query("anotherVersion", |t| {
