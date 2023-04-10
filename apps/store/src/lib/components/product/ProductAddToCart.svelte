@@ -19,7 +19,7 @@
 
 	$: {
 		currentVariant = variant;
-		const i: any = $cart.lineItems.find((i) => {
+		const i: any = $cart.line_items.find((i) => {
 			return currentVariant.id === i.variant.id;
 		});
 

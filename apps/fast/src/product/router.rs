@@ -9,7 +9,7 @@ use crate::{
 use super::{product::Product, service::ProductService};
 use rspc::Error;
 
-pub fn create_products_router() -> rspc::RouterBuilder<Ctx> {
+pub fn create_product_router() -> rspc::RouterBuilder<Ctx> {
     <Router<Ctx>>::new()
         .query("get", |t| {
             t(

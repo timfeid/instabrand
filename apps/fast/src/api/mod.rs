@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::Arc};
 use rspc::Config;
 pub use rspc::RouterBuilder;
 
-use crate::{prisma, product::router::create_products_router};
+use crate::{cart::router::create_cart_router, prisma, product::router::create_product_router};
 
 #[derive(Clone)]
 pub struct Ctx {
@@ -13,7 +13,8 @@ pub struct Ctx {
 pub type Router = rspc::Router<Ctx>;
 
 pub(crate) fn new() -> RouterBuilder<Ctx> {
-    let products_router = create_products_router();
+    let product_router = create_product_router();
+    let cart_router = create_cart_router();
 
     Router::new()
         .config(
@@ -27,5 +28,6 @@ pub(crate) fn new() -> RouterBuilder<Ctx> {
             t(|_, _: ()| env!("CARGO_PKG_VERSION"))
         })
         .query("version", |t| t(|_, _: ()| env!("CARGO_PKG_VERSION")))
-        .merge("products.", products_router)
+        .merge("products.", product_router)
+        .merge("cart.", cart_router)
 }

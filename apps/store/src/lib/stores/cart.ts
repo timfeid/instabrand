@@ -1,12 +1,12 @@
 import { writable, get } from 'svelte/store';
 import { brand } from './brand';
-import { client } from '../request';
 import { gql } from '@apollo/client';
 import { cartFragment } from '../fragments/cart.fragment';
 import { browser } from '$app/environment';
+import { client } from '../client';
 
 export const defaultCart: Cart = {
-	lineItems: [],
+	line_items: [],
 	id: '',
 	sync: false,
 };
@@ -17,7 +17,7 @@ type LineItem = {
 };
 
 export type Cart = {
-	lineItems: LineItem[];
+	line_items: LineItem[];
 	id: string | null;
 	sync: boolean;
 };
@@ -30,30 +30,30 @@ export const setCartProduct = (
 	replace: string | false = false,
 ) => {
 	cart.update((cart) => {
-		const lineItems = [...cart.lineItems];
+		const line_items = [...cart.line_items];
 
 		if (replace && replace !== variantId) {
-			const replaceIndex = lineItems.findIndex((product) => product.variant.id === replace);
+			const replaceIndex = line_items.findIndex((product) => product.variant.id === replace);
 			if (replaceIndex !== -1) {
-				lineItems.splice(replaceIndex, 1);
+				line_items.splice(replaceIndex, 1);
 			}
 		}
 
-		const productIndex = lineItems.findIndex((product) => product.variant.id === variantId);
+		const productIndex = line_items.findIndex((product) => product.variant.id === variantId);
 
 		if (productIndex >= 0) {
 			if (quantity === 0) {
-				lineItems.splice(productIndex, 1);
+				line_items.splice(productIndex, 1);
 			} else if (!replace) {
-				lineItems[productIndex].quantity += quantity;
+				line_items[productIndex].quantity += quantity;
 			} else {
-				lineItems[productIndex].quantity = quantity;
+				line_items[productIndex].quantity = quantity;
 			}
 		} else if (quantity > 0) {
-			lineItems.push({ variant: { id: variantId }, quantity });
+			line_items.push({ variant: { id: variantId }, quantity });
 		}
 
-		cart.lineItems = lineItems;
+		cart.line_items = line_items;
 		cart.sync = true;
 
 		return cart;
@@ -68,7 +68,7 @@ cart.subscribe(async (data) => {
 	let total = 0;
 	const brandId = get(brand)?.id;
 
-	for (const product of data.lineItems) {
+	for (const product of data.line_items) {
 		total += product.quantity;
 	}
 
@@ -78,25 +78,30 @@ cart.subscribe(async (data) => {
 	// second time is setting from session
 	if (browser && ++times > 1 && data.sync !== false) {
 		try {
-			const response = await client.mutate({
-				mutation: gql`
-					${cartFragment}
-					mutation setCart($id: String, $lineItems: [SetCartItem]!, $brandId: String!) {
-						setCart(id: $id, lineItems: $lineItems, brandId: $brandId) {
-							...Cart
-						}
-					}
-				`,
-				variables: {
-					id: data.id,
-					lineItems: data.lineItems.map((li) => {
-						return { variantId: li.variant.id, quantity: li.quantity };
+			// const response = await client.mutate({
+			// 	mutation: gql`
+			// 		${cartFragment}
+			// 		mutation setCart($id: String, $line_items: [SetCartItem]!, $brandId: String!) {
+			// 			setCart(id: $id, line_items: $line_items, brandId: $brandId) {
+			// 				...Cart
+			// 			}
+			// 		}
+			// 	`,
+			// 	variables: {
+
+			// 	},
+			// 	fetchPolicy: 'network-only',
+			// });
+			const response = await client.mutation([
+				'cart.set',
+				{
+					line_items: data.line_items.map((li) => {
+						return { variant_id: li.variant.id, quantity: li.quantity };
 					}),
-					brandId,
+					brand_id: brandId,
 				},
-				fetchPolicy: 'network-only',
-			});
-			cart.set({ ...response.data.setCart.order, sync: false });
+			]);
+			cart.set({ ...response.order, sync: false });
 		} catch (e) {
 			console.log(e);
 		}
