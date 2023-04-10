@@ -82,13 +82,6 @@ impl From<order_with_relations::Data> for Order {
     }
 }
 
-// export type OrderDetails = {
-//     brandId: string
-//     status: OrderStatus
-//     lineItems: OrderDetailsItem[]
-//     customerId?: string
-// }
-
 #[derive(Type, Deserialize)]
 pub struct CreateOrderLineItem {
     variant_id: String,
@@ -193,42 +186,42 @@ impl OrderWithDatabase {
     }
 
     async fn sync_line_items(&mut self, line_items: Vec<CreateOrderLineItem>) -> &mut Self {
-        if let Ok(data) = self
-            .db
-            .line_item()
-            .delete_many(vec![prisma::line_item::order_id::equals(
-                self.order.id.clone(),
-            )])
+        let order_id = self.order.id.clone();
+        let db = &self.db;
+
+        db.line_item()
+            .delete_many(vec![prisma::line_item::order_id::equals(order_id.clone())])
             .exec()
             .await
-        {
-            if let Ok(data) = self
-                .db
-                .line_item()
-                .create_many(
-                    line_items
-                        .iter()
-                        .map(|i| {
-                            prisma::line_item::create_unchecked(
-                                Ulid::new().to_string(),
-                                i.variant_id.clone(),
-                                self.order.id.clone(),
-                                i.quantity,
-                                vec![],
-                            )
-                        })
-                        .collect(),
+            .unwrap();
+
+        let line_items_data = line_items
+            .iter()
+            .map(|i| {
+                prisma::line_item::create_unchecked(
+                    Ulid::new().to_string(),
+                    i.variant_id.clone(),
+                    order_id.clone(),
+                    i.quantity,
+                    vec![],
                 )
-                .exec()
-                .await
-            {
-                if let Some(order) = Order::find_by_id(self.db.clone(), self.order.id.clone()).await
-                {
-                    self.order = order.order;
-                }
-            }
-        }
+            })
+            .collect();
+
+        db.line_item()
+            .create_many(line_items_data)
+            .exec()
+            .await
+            .unwrap();
+
+        self.refresh_order().await;
 
         self
+    }
+
+    async fn refresh_order(&mut self) {
+        if let Some(order) = Order::find_by_id(self.db.clone(), self.order.id.clone()).await {
+            self.order = order.order;
+        }
     }
 }
