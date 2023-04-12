@@ -1,9 +1,14 @@
 // See https://kit.svelte.dev/docs/types#app
+
+import type { SessionCart } from './lib/bindings';
+
 // for information about these interfaces
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			cart: SessionCart | null;
+		}
 		// interface PageData {}
 		// interface Platform {}
 	}

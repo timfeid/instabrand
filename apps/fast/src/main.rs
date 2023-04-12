@@ -1,7 +1,23 @@
 use crate::api::Ctx;
-use axum::routing::get;
+use axum::{
+    http::{
+        header::{AUTHORIZATION, CONTENT_TYPE},
+        HeaderValue, Method,
+    },
+    routing::get,
+};
+use axum_sessions::{
+    async_session::{MemoryStore, Session},
+    extractors::WritableSession,
+    PersistencePolicy, SessionHandle, SessionLayer,
+};
 use prisma::PrismaClient;
+use prisma_client_rust::chrono::format;
+use rand::Rng;
+use rspc::integrations::httpz::{Request, TCtxFunc};
 use std::{net::SocketAddr, sync::Arc};
+use tokio::sync::RwLock;
+use tower_cookies::{CookieManagerLayer, Cookies};
 use tower_http::cors::{Any, CorsLayer};
 
 mod api;
@@ -14,18 +30,52 @@ mod utils;
 mod variant;
 
 fn router(db: Arc<PrismaClient>) -> axum::Router {
+    dotenv::dotenv().unwrap();
     let router = api::new().build().arced();
+
+    let store = MemoryStore::new();
+    let secret: [u8; 64] = {
+        let left: [u8; 32] = rand::thread_rng().gen();
+        let right: [u8; 32] = rand::thread_rng().gen();
+        let mut whole: [u8; 64] = [0; 64];
+        let (one, two) = whole.split_at_mut(left.len());
+        one.copy_from_slice(&left);
+        two.copy_from_slice(&right);
+
+        whole
+    };
+    let cookie_domain = dotenv::var("COOKIE_DOMAIN").unwrap_or("localhost".into());
+    let session_layer = SessionLayer::new(store, &secret)
+        .with_http_only(true)
+        .with_cookie_domain(cookie_domain);
+
+    let allowed_origins = ["http://localhost:5173".parse::<HeaderValue>().unwrap()];
+    let allowed_headers = [AUTHORIZATION, CONTENT_TYPE];
+    let allowed_methods = [Method::GET, Method::POST, Method::OPTIONS];
 
     axum::Router::new()
         .route("/", get(|| async { "Welcome to your new rspc app!" }))
         .route("/health", get(|| async { "Ok!" }))
-        .nest("/rspc/:id", router.endpoint(|| Ctx { db }).axum())
+        .nest(
+            "/rspc/:id",
+            router
+                .endpoint(|req: Request| {
+                    let session_handle =
+                        req.extensions().get::<SessionHandle>().unwrap().to_owned();
+
+                    Ctx { session_handle, db }
+                })
+                .axum(),
+        )
+        .layer(CookieManagerLayer::new())
         .layer(
             CorsLayer::new()
-                .allow_methods(Any)
-                .allow_headers(Any)
-                .allow_origin(Any),
+                .allow_methods(allowed_methods)
+                .allow_headers(allowed_headers)
+                .allow_origin(allowed_origins)
+                .allow_credentials(true),
         )
+        .layer(session_layer)
 }
 
 #[tokio::main]

@@ -35,7 +35,7 @@ export async function paymentSubmitted(paymentIntentId: string) {
 
 		cart.set({ ...defaultCart, sync: false });
 	} catch (e) {
-		console.log(e);
+		console.log('errrrrror', e);
 	}
 
 	checkout.update((data) => ({

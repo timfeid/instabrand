@@ -6,8 +6,6 @@ export const load: PageServerLoad = async function ({ params }) {
 	const variantSlug = params.slug.split('/')[1];
 	const product = await getProduct(productSlug || '', variantSlug);
 
-	console.log(product);
-
 	return {
 		product,
 	};

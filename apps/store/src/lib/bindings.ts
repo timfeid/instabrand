@@ -3,6 +3,7 @@
 export type Procedures = {
     queries: 
         { key: "anotherVersion", input: never, result: string } | 
+        { key: "cart.get", input: string, result: SessionCart | null } | 
         { key: "products.get", input: [string, string | null], result: VariantWithTypes } | 
         { key: "products.list", input: never, result: Product[] } | 
         { key: "version", input: never, result: string },
@@ -13,11 +14,7 @@ export type Procedures = {
 
 export type Order = { id: string; line_items: LineItem[]; subtotal: string }
 
-export type SetCart = { brand_id: string; line_items: CreateOrderLineItem[] }
-
 export type ProductAvailability = "InStock" | "Limited" | "SoldOut" | "PreOrder"
-
-export type Cart = { order: Order }
 
 export type ProductListType = { name: string; variants: VariantWithType[] }
 
@@ -27,7 +24,7 @@ export type Product = { id: string; name: string; slug: string; price: ProductPr
 
 export type VariantWithType = { id: string; value: string; slug: string; selected: boolean }
 
-export type CreateOrderLineItem = { variant_id: string; quantity: number }
+export type Cart = { order: Order }
 
 export type Image = { picture_sources: PictureSource[]; src: string; srcset: string; alt: string }
 
@@ -35,6 +32,12 @@ export type PictureSource = { media: string; srcset: string }
 
 export type LineItem = { variant: Variant; quantity: number }
 
+export type CreateOrderLineItem = { variant_id: string; quantity: number }
+
+export type SetCart = { brand_id: string; line_items: CreateOrderLineItem[] }
+
 export type ProductPrice = { actual: string; compare_at: string | null }
 
 export type VariantWithTypes = { variant: Variant; types: ProductListType[]; product: Product }
+
+export type SessionCart = { line_items: CreateOrderLineItem[]; id: string }

@@ -12,8 +12,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Type, Serialize, Debug, Clone, PartialEq, Eq, Default)]
 pub struct LineItem {
-    variant: Variant,
-    quantity: i32, // prob doesn't need to be i32?
+    pub variant: Variant,
+    pub quantity: i32, // prob doesn't need to be i32?
 }
 
 #[derive(Type, Serialize, Debug, Clone, PartialEq, Eq, Default)]
@@ -82,10 +82,10 @@ impl From<order_with_relations::Data> for Order {
     }
 }
 
-#[derive(Type, Deserialize)]
+#[derive(Type, Serialize, Deserialize, Debug)]
 pub struct CreateOrderLineItem {
-    variant_id: String,
-    quantity: i32,
+    pub variant_id: String,
+    pub quantity: i32,
 }
 
 #[derive(Type, Deserialize)]

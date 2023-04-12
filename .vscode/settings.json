@@ -22,6 +22,7 @@
     "**/.hg": true,
     "**/.svn": true,
     "**/.next": true,
+    "target/*": true,
     "**/CVS": true,
     "**/Thumbs.db": true,
     "**/.svelte-kit": true,

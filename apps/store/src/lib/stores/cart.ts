@@ -103,7 +103,7 @@ cart.subscribe(async (data) => {
 			]);
 			cart.set({ ...response.order, sync: false });
 		} catch (e) {
-			console.log(e);
+			console.log('error', e);
 		}
 	}
 });
