@@ -4,7 +4,7 @@ use rspc::{selection, Type};
 use serde::Serialize;
 
 use crate::{
-    image::image::{AsImage, Image},
+    image::image::Image,
     order::order::order_with_relations,
     prisma,
     variant::variant::{
@@ -55,14 +55,6 @@ pub struct Product {
     pub availability: ProductAvailability,
     pub label: Option<String>,
     pub variants: Vec<Variant>,
-}
-
-impl AsImage for variant_with_relations::product::images::Data {
-    fn as_image(&self) -> prisma::image::Data {
-        prisma::image::Data {
-            ..self.image.clone()
-        }
-    }
 }
 
 impl From<variant_with_relations::product::Data> for Product {
@@ -167,24 +159,24 @@ impl Into<variant_with_relations::product::Data>
     }
 }
 
-impl AsImage for order_with_relations::line_items::variant::product::images::Data {
-    fn as_image(&self) -> prisma::image::Data {
+impl Into<prisma::image::Data> for product_with_relations::images::Data {
+    fn into(self) -> prisma::image::Data {
         prisma::image::Data {
             ..self.image.clone()
         }
     }
 }
 
-impl AsImage for product_with_relations::images::Data {
-    fn as_image(&self) -> prisma::image::Data {
+impl Into<prisma::image::Data> for variant_with_relations::images::Data {
+    fn into(self) -> prisma::image::Data {
         prisma::image::Data {
             ..self.image.clone()
         }
     }
 }
 
-impl AsImage for product_with_relations::variants::images::Data {
-    fn as_image(&self) -> prisma::image::Data {
+impl Into<prisma::image::Data> for product_with_relations::variants::images::Data {
+    fn into(self) -> prisma::image::Data {
         prisma::image::Data {
             ..self.image.clone()
         }
@@ -232,7 +224,7 @@ impl Into<Product> for ProductWithRelations {
 
         let primary_image = Product::find_image_at(&self, 0);
         let secondary_image = Product::find_image_at(&self, 1);
-        let images = Image::extract_images(&self.images, &self.name);
+        let images = Image::extract_images(self.images, &self.name);
 
         Product {
             id: self.id,
@@ -253,7 +245,7 @@ impl Into<Product> for ProductWithRelations {
 impl Product {
     fn find_image_at(product: &ProductWithRelations, index: usize) -> Option<Image> {
         if let Some(image) = product.images.get(index) {
-            return Some(Image::from_data(&image.as_image(), "alt".into()));
+            return Some(Image::from_data(image.clone().into(), "alt".into()));
         }
 
         None
