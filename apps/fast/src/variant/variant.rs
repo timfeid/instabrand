@@ -13,6 +13,16 @@ use crate::{
 
 variant::include!(variant_with_relations {
     images: select { url image }
+    product: include {
+        images: select {
+            url image
+        }
+        variants: include {
+            images: select {
+                url image
+            }
+        }
+    }
 });
 
 type VariantWithRelations = variant_with_relations::Data;
@@ -178,6 +188,7 @@ pub struct Variant {
     pub color: Option<String>,
     pub material: Option<String>,
     pub style: Option<String>,
+    pub product: Product,
 }
 
 impl Variant {
@@ -203,7 +214,13 @@ impl Variant {
         let price = Variant::get_product_price(data.price_in_cents, data.compare_at_price_in_cents);
 
         let images = Image::extract_images(&data.images, product_name);
-        let image = data.find_image_at(0);
+        let mut image = data.find_image_at(0);
+
+        let product: Product = data.product.into();
+
+        if image.is_none() {
+            image = product.primary_image.clone();
+        }
 
         Variant {
             id: data.id,
@@ -216,6 +233,7 @@ impl Variant {
             color: data.color,
             material: data.material,
             style: data.style,
+            product,
         }
     }
 }

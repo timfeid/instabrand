@@ -14,7 +14,7 @@
 	let inCart = false;
 
 	function addToCart() {
-		setCartProduct(currentVariant.id, quantity, currentVariant.id);
+		setCartProduct(currentVariant, quantity, currentVariant.id);
 	}
 
 	$: {

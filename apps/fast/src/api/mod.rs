@@ -33,7 +33,7 @@ pub(crate) fn new() -> RouterBuilder<Ctx> {
                 env!("CARGO_PKG_VERSION")
             })
         })
-        .query("version", |t| t(|_, _: ()| env!("CARGO_PKG_VERSION")))
+        .query("somethingelse", |t| t(|_, _: ()| env!("CARGO_PKG_VERSION")))
         .merge("products.", product_router)
         .merge("cart.", cart_router)
 }

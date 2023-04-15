@@ -56,6 +56,7 @@ impl From<order_with_relations::line_items::variant::Data> for variant_with_rela
             cost_in_cents: value.cost_in_cents,
             compare_at_price_in_cents: value.compare_at_price_in_cents,
             images: vec![],
+            product: value.product.into(),
         }
     }
 }
@@ -104,15 +105,23 @@ pub struct UpdateOrder {
 }
 
 impl Order {
-    pub async fn find_by_id(db: Arc<PrismaClient>, id: String) -> Option<OrderWithDatabase> {
-        if let Some(data) = db
+    pub async fn find_by_id(
+        db: Arc<PrismaClient>,
+        id: String,
+        status: Option<OrderStatus>,
+    ) -> Option<OrderWithDatabase> {
+        let mut wheres = vec![prisma::order::id::equals(id)];
+
+        if let Some(status) = status {
+            wheres.push(prisma::order::status::equals(status));
+        }
+
+        let query = db
             .order()
-            .find_unique(prisma::order::id::equals(id))
-            .include(order_with_relations::include())
-            .exec()
-            .await
-            .unwrap()
-        {
+            .find_first(wheres)
+            .include(order_with_relations::include());
+
+        if let Some(data) = query.exec().await.unwrap() {
             return Some(OrderWithDatabase {
                 db,
                 order: Into::<Order>::into(data),
@@ -220,7 +229,7 @@ impl OrderWithDatabase {
     }
 
     async fn refresh_order(&mut self) {
-        if let Some(order) = Order::find_by_id(self.db.clone(), self.order.id.clone()).await {
+        if let Some(order) = Order::find_by_id(self.db.clone(), self.order.id.clone(), None).await {
             self.order = order.order;
         }
     }

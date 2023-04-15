@@ -71,4 +71,9 @@ pub fn create_cart_router() -> rspc::RouterBuilder<Ctx> {
                 session.get::<SessionCart>(&session_key)
             })
         })
+        .query("getById", |t| {
+            t(|ctx, cart_id: String| async move {
+                return Cart::find_by_id(ctx.db, cart_id).await;
+            })
+        })
 }

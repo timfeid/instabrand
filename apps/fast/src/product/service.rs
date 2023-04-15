@@ -8,7 +8,7 @@ pub struct ProductService;
 
 product::include!(product_with_relations {
     images: select { url image }
-    variants: include { images: select { url image } }
+    variants: include { images: select { url image } product }
 });
 
 impl ProductService {

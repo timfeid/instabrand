@@ -5,7 +5,7 @@
 </script>
 
 <div>
-  <CartItems items={$cart.lineItems} editable={false} />
+  <CartItems items={$cart.line_items} editable={false} />
 </div>
 
 <div class="hidden md:block mt-6">

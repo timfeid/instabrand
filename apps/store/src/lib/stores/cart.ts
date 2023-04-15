@@ -4,10 +4,14 @@ import { gql } from '@apollo/client';
 import { cartFragment } from '../fragments/cart.fragment';
 import { browser } from '$app/environment';
 import { client } from '../client';
+import type { Order as OrderModel, Variant } from '../bindings';
+
+type Cart = OrderModel & { sync: boolean };
 
 export const defaultCart: Cart = {
 	line_items: [],
 	id: '',
+	subtotal: '',
 	sync: false,
 };
 
@@ -16,30 +20,24 @@ type LineItem = {
 	quantity: number;
 };
 
-export type Cart = {
-	line_items: LineItem[];
-	id: string | null;
-	sync: boolean;
-};
-
 export const cart = writable<Cart>({ ...defaultCart });
 
 export const setCartProduct = (
-	variantId: string,
+	variant: Variant,
 	quantity: number,
 	replace: string | false = false,
 ) => {
 	cart.update((cart) => {
 		const line_items = [...cart.line_items];
 
-		if (replace && replace !== variantId) {
+		if (replace && replace !== variant.id) {
 			const replaceIndex = line_items.findIndex((product) => product.variant.id === replace);
 			if (replaceIndex !== -1) {
 				line_items.splice(replaceIndex, 1);
 			}
 		}
 
-		const productIndex = line_items.findIndex((product) => product.variant.id === variantId);
+		const productIndex = line_items.findIndex((product) => product.variant.id === variant.id);
 
 		if (productIndex >= 0) {
 			if (quantity === 0) {
@@ -50,7 +48,7 @@ export const setCartProduct = (
 				line_items[productIndex].quantity = quantity;
 			}
 		} else if (quantity > 0) {
-			line_items.push({ variant: { id: variantId }, quantity });
+			line_items.push({ variant, quantity });
 		}
 
 		cart.line_items = line_items;

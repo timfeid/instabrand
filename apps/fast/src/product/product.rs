@@ -5,8 +5,12 @@ use serde::Serialize;
 
 use crate::{
     image::image::{AsImage, Image},
+    order::order::order_with_relations,
     prisma,
-    variant::variant::{variant_with_relations::Data as VariantWithRelations, Variant},
+    variant::variant::{
+        variant_with_relations::{self, Data as VariantWithRelations},
+        Variant,
+    },
 };
 
 use super::service::product_with_relations;
@@ -53,6 +57,124 @@ pub struct Product {
     pub variants: Vec<Variant>,
 }
 
+impl AsImage for variant_with_relations::product::images::Data {
+    fn as_image(&self) -> prisma::image::Data {
+        prisma::image::Data {
+            ..self.image.clone()
+        }
+    }
+}
+
+impl From<variant_with_relations::product::Data> for Product {
+    fn from(value: variant_with_relations::product::Data) -> Self {
+        let p: ProductWithRelations = value.into();
+        p.into()
+    }
+}
+
+impl From<variant_with_relations::product::Data> for product_with_relations::Data {
+    fn from(value: variant_with_relations::product::Data) -> Self {
+        let mut images: Vec<product_with_relations::images::Data> = Vec::new();
+
+        for image in value.images {
+            images.push(product_with_relations::images::Data {
+                url: image.url,
+                image: image.image,
+            });
+        }
+
+        return product_with_relations::Data {
+            id: value.id,
+            name: value.name,
+            description: value.description,
+            slug: value.slug,
+            brand_id: value.brand_id,
+            created_at: value.created_at,
+            updated_at: value.updated_at,
+            deleted_at: value.deleted_at,
+            images,
+            variants: vec![],
+        };
+    }
+}
+
+impl Into<variant_with_relations::product::Data> for prisma::product::Data {
+    fn into(self) -> variant_with_relations::product::Data {
+        let mut images: Vec<variant_with_relations::product::images::Data> = Vec::new();
+
+        self.images.into_iter().for_each(|image| {
+            for image in image {
+                if let Some(image) = image.image {
+                    images.push(variant_with_relations::product::images::Data {
+                        url: image.url.clone(),
+                        image: prisma::image::Data {
+                            url: image.url,
+                            url_2_x: image.url_2_x,
+                            url_desktop: image.url_desktop,
+                            url_desktop_2_x: image.url_desktop_2_x,
+                            url_mobile: image.url_mobile,
+                            url_mobile_2_x: image.url_mobile_2_x,
+                            url_tablet: image.url_tablet,
+                            url_tablet_2_x: image.url_tablet_2_x,
+                            image_product: None,
+                            variant_image: None,
+                        },
+                    });
+                }
+            }
+        });
+
+        variant_with_relations::product::Data {
+            id: self.id,
+            name: self.name,
+            slug: self.slug,
+            brand_id: self.brand_id,
+            created_at: self.created_at,
+            description: self.description,
+            updated_at: self.updated_at,
+            deleted_at: self.deleted_at,
+            images,
+            variants: vec![],
+        }
+    }
+}
+
+impl Into<variant_with_relations::product::Data>
+    for order_with_relations::line_items::variant::product::Data
+{
+    fn into(self) -> variant_with_relations::product::Data {
+        let mut images: Vec<variant_with_relations::product::images::Data> = Vec::new();
+
+        for image in self.images {
+            images.push(variant_with_relations::product::images::Data {
+                url: image.url,
+                image: image.image,
+            });
+        }
+
+        variant_with_relations::product::Data {
+            id: self.id,
+            name: self.name,
+            slug: self.slug,
+            brand_id: self.brand_id,
+            created_at: self.created_at,
+            description: self.description,
+            updated_at: self.updated_at,
+            deleted_at: self.deleted_at,
+            images,
+            variants: vec![],
+        }
+    }
+}
+
+impl AsImage for order_with_relations::line_items::variant::product::images::Data {
+    fn as_image(&self) -> prisma::image::Data {
+        prisma::image::Data {
+            ..self.image.clone()
+        }
+    }
+}
+
 impl AsImage for product_with_relations::images::Data {
     fn as_image(&self) -> prisma::image::Data {
         prisma::image::Data {
@@ -87,6 +209,7 @@ impl From<product_with_relations::variants::Data> for VariantWithRelations {
             cost_in_cents: value.cost_in_cents,
             compare_at_price_in_cents: value.compare_at_price_in_cents,
             images: vec![],
+            product: value.product.into(),
         }
     }
 }

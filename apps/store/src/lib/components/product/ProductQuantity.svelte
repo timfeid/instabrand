@@ -20,7 +20,7 @@
 		}
 
 		if (replaceOnChange) {
-			setCartProduct(currentVariant.id, quantity, currentVariant.id)
+			setCartProduct(currentVariant, quantity, currentVariant.id)
 		}
 	};
 

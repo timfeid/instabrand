@@ -44,7 +44,7 @@ impl Cart {
     }
 
     pub async fn update(db: Arc<PrismaClient>, id: String, details: SetCart) -> Option<Self> {
-        if let Some(mut order) = Order::find_by_id(db, id).await {
+        if let Some(mut order) = Order::find_by_id(db, id, None).await {
             order
                 .update(UpdateOrder {
                     status: None,
@@ -53,6 +53,14 @@ impl Cart {
                 })
                 .await;
 
+            return Some(Cart { order: order.order });
+        }
+
+        None
+    }
+
+    pub async fn find_by_id(db: Arc<PrismaClient>, id: String) -> Option<Self> {
+        if let Some(order) = Order::find_by_id(db, id, Some(OrderStatus::Cart)).await {
             return Some(Cart { order: order.order });
         }
 

@@ -1,8 +1,9 @@
 <script lang="ts">
+	import type { LineItem } from '../../bindings';
 	import Image from '../Image.svelte';
 	import ProductQuantity from '../product/ProductQuantity.svelte';
 
-	export let items: any[];
+	export let items: LineItem[];
 	export let editable = true;
 </script>
 
@@ -10,7 +11,9 @@
 	<div class="last:border-0 last:mb-0 last:pb-0 border-b pb-4 mb-4 flex flex-col md:flex-row">
 		<div class="flex flex-row w-full">
 			<div class="w-80 h-80 mr-16">
-				<Image image={row.variant.image} />
+				{#if row.variant.image}
+					<Image image={row.variant.image} />
+				{/if}
 			</div>
 			<div class="flex flex-col md:flex-row ml-4 flex-grow">
 				<div class="flex flex-col justify-center">
