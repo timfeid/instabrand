@@ -40,21 +40,4 @@ impl Image {
             alt,
         }
     }
-
-    pub fn extract_images<T>(images: &Vec<T>, alt: &String) -> Vec<Image>
-    where
-        T: Into<image::Data>,
-        T: Copy,
-    {
-        let mut i: Vec<Image> = Vec::new();
-
-        for image in images {
-            i.push(Image::from_data(
-                Into::<image::Data>::into(*image),
-                alt.clone(),
-            ))
-        }
-
-        i
-    }
 }

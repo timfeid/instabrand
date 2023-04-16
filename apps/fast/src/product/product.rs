@@ -206,6 +206,14 @@ impl From<product_with_relations::variants::Data> for VariantWithRelations {
     }
 }
 
+impl From<&product_with_relations::images::Data> for prisma::image::Data {
+    fn from(value: &product_with_relations::images::Data) -> Self {
+        return prisma::image::Data {
+            ..value.image.clone()
+        };
+    }
+}
+
 impl Into<Product> for ProductWithRelations {
     fn into(self) -> Product {
         let variants: Vec<Variant> = self
@@ -224,7 +232,11 @@ impl Into<Product> for ProductWithRelations {
 
         let primary_image = Product::find_image_at(&self, 0);
         let secondary_image = Product::find_image_at(&self, 1);
-        let images = Image::extract_images(self.images, &self.name);
+        let images = self
+            .images
+            .iter()
+            .map(|i| Image::from_data(Into::into(i), self.name.clone()))
+            .collect();
 
         Product {
             id: self.id,

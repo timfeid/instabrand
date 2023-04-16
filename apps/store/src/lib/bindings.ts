@@ -21,23 +21,23 @@ export type PictureSource = { media: string; srcset: string }
 
 export type Product = { id: string; name: string; slug: string; price: ProductPrice; description: string; primary_image: Image | null; secondary_image: Image | null; images: Image[]; availability: ProductAvailability; label: string | null; variants: Variant[] }
 
+export type VariantWithTypes = { variant: Variant; types: ProductListType[]; product: Product }
+
 export type VariantWithType = { id: string; value: string; slug: string; selected: boolean }
 
 export type Cart = { order: Order }
 
-export type VariantWithTypes = { variant: Variant; types: ProductListType[]; product: Product }
-
 export type CreateOrderLineItem = { variant_id: string; quantity: number }
 
 export type Image = { picture_sources: PictureSource[]; src: string; srcset: string; alt: string }
-
-export type ProductListType = { name: string; variants: VariantWithType[] }
 
 export type Variant = { id: string; slug: string; price: ProductPrice; availability: ProductAvailability; images: Image[]; image: Image | null; size: string | null; color: string | null; material: string | null; style: string | null; product: Product }
 
 export type LineItem = { variant: Variant; quantity: number }
 
 export type SetCart = { brand_id: string; line_items: CreateOrderLineItem[] }
+
+export type ProductListType = { name: string; variants: VariantWithType[] }
 
 export type ProductAvailability = "InStock" | "Limited" | "SoldOut" | "PreOrder"
 
