@@ -1,23 +1,8 @@
 import { gql } from '@apollo/client';
 import { readable } from 'svelte/store';
-import { client } from '../request';
-
-type State = {
-	name: string;
-	abbreviation: string;
-};
+import type { State } from '../bindings';
+import { client } from '../client';
 
 export const states = readable<State[]>([], (set) => {
-	client
-		.query({
-			query: gql`
-				query {
-					states {
-						name
-						abbreviation
-					}
-				}
-			`,
-		})
-		.then((states) => set(states.data.states));
+	client.query(['state.list']).then((states) => set(states));
 });

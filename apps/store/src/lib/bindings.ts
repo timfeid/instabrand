@@ -7,15 +7,16 @@ export type Procedures = {
         { key: "cart.getById", input: string, result: Cart | null } | 
         { key: "products.get", input: [string, string | null], result: VariantWithTypes } | 
         { key: "products.list", input: never, result: Product[] } | 
-        { key: "somethingelse", input: never, result: string },
+        { key: "somethingelse", input: never, result: string } | 
+        { key: "state.list", input: never, result: State[] },
     mutations: 
         { key: "cart.set", input: SetCart, result: Cart },
     subscriptions: never
 };
 
-export type Order = { id: string; line_items: LineItem[]; subtotal: string }
+export type Order = { id: string; line_items: LineItem[]; subtotal_cents: number; total_cents: number }
 
-export type ProductPrice = { actual: string; compare_at: string | null }
+export type ProductPrice = { actual_cents: number; compare_at_cents: number | null }
 
 export type PictureSource = { media: string; srcset: string }
 
@@ -27,13 +28,15 @@ export type VariantWithType = { id: string; value: string; slug: string; selecte
 
 export type Cart = { order: Order }
 
-export type CreateOrderLineItem = { variant_id: string; quantity: number }
+export type State = { id: number; name: string; abbreviation: string }
 
 export type Image = { picture_sources: PictureSource[]; src: string; srcset: string; alt: string }
 
 export type Variant = { id: string; slug: string; price: ProductPrice; availability: ProductAvailability; images: Image[]; image: Image | null; size: string | null; color: string | null; material: string | null; style: string | null; product: Product }
 
 export type LineItem = { variant: Variant; quantity: number }
+
+export type CreateOrderLineItem = { variant_id: string; quantity: number }
 
 export type SetCart = { brand_id: string; line_items: CreateOrderLineItem[] }
 

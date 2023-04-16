@@ -26,6 +26,7 @@ mod image;
 mod order;
 mod prisma;
 mod product;
+mod state;
 mod utils;
 mod variant;
 

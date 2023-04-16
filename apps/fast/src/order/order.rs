@@ -20,7 +20,8 @@ pub struct LineItem {
 pub struct Order {
     pub id: String,
     pub line_items: Vec<LineItem>,
-    pub subtotal: String,
+    pub subtotal_cents: i32,
+    pub total_cents: i32,
 }
 
 pub struct OrderWithDatabase {
@@ -78,7 +79,8 @@ impl From<order_with_relations::Data> for Order {
         Order {
             id: value.id,
             line_items,
-            subtotal: subtotal.to_string(),
+            subtotal_cents: subtotal,
+            total_cents: subtotal,
         }
     }
 }

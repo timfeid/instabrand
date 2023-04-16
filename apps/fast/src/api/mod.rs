@@ -6,7 +6,10 @@ use rspc::{integrations::httpz::CookieJar, Config};
 use tokio::sync::RwLockReadGuard;
 use tower_cookies::Cookies;
 
-use crate::{cart::router::create_cart_router, prisma, product::router::create_product_router};
+use crate::{
+    cart::router::create_cart_router, prisma, product::router::create_product_router,
+    state::router::create_state_router,
+};
 
 pub struct Ctx {
     pub db: Arc<prisma::PrismaClient>,
@@ -18,6 +21,7 @@ pub type Router<'a> = rspc::Router<Ctx>;
 pub(crate) fn new() -> RouterBuilder<Ctx> {
     let product_router = create_product_router();
     let cart_router = create_cart_router();
+    let state_router = create_state_router();
 
     Router::new()
         .config(
@@ -36,4 +40,5 @@ pub(crate) fn new() -> RouterBuilder<Ctx> {
         .query("somethingelse", |t| t(|_, _: ()| env!("CARGO_PKG_VERSION")))
         .merge("products.", product_router)
         .merge("cart.", cart_router)
+        .merge("state.", state_router)
 }

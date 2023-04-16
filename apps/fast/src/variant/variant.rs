@@ -200,12 +200,8 @@ impl Variant {
         compare_at_price_in_cents: Option<i32>,
     ) -> ProductPrice {
         ProductPrice {
-            actual: format!("${}", price_in_cents / 100),
-            compare_at: if let Some(price) = compare_at_price_in_cents {
-                Some(format!("${}", price / 100))
-            } else {
-                None
-            },
+            actual_cents: price_in_cents,
+            compare_at_cents: compare_at_price_in_cents,
         }
     }
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { LineItem } from '../../bindings';
 	import Image from '../Image.svelte';
+	import ProductPrice from '../product/ProductPrice.svelte';
 	import ProductQuantity from '../product/ProductQuantity.svelte';
 
 	export let items: LineItem[];
@@ -31,8 +32,12 @@
               {/if}
 						{/each}
 					</div>
-					<div class="mt-1 font-normal mb-4">
-						{row.quantity} &times; @ {row.pricePer}
+					<div class="mt-1 font-normal mb-4 flex">
+						<div class="mr-1">
+							{row.quantity} &times; @
+						</div>
+
+						<ProductPrice price={row.variant.price} themeName="cartLineItem" />
 					</div>
           {#if editable}
             <ProductQuantity quantity={row.quantity} variant={row.variant} themeName="productPage" replaceOnChange />

@@ -24,8 +24,8 @@ pub struct PictureSource {
 
 #[derive(Type, Serialize, Default, Debug, Clone, PartialEq, Eq)]
 pub struct ProductPrice {
-    pub actual: String,
-    pub compare_at: Option<String>,
+    pub actual_cents: i32,
+    pub compare_at_cents: Option<i32>,
 }
 
 #[derive(Type, Serialize, Debug, Clone, PartialEq, Eq)]
