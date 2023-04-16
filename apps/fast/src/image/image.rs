@@ -19,7 +19,7 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn from_data(image: &image::Data, alt: String) -> Image {
+    pub fn from_data(image: image::Data, alt: String) -> Image {
         Image {
             picture_sources: vec![
                 PictureSource {
@@ -39,13 +39,5 @@ impl Image {
             srcset: format!("{}\n{} 2x", image.url, image.url_2_x),
             alt,
         }
-    }
-
-    pub fn extract_images<T: AsImage>(images: &Vec<T>, alt: &String) -> Vec<Image> {
-        images
-            .iter()
-            .map(|i| i.as_image())
-            .map(|i| Image::from_data(&i, alt.clone()))
-            .collect()
     }
 }

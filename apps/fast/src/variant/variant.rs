@@ -3,7 +3,7 @@ use serde::Serialize;
 use std::collections::HashSet;
 
 use crate::{
-    image::image::{AsImage, Image},
+    image::image::Image,
     prisma::{
         self,
         variant::{self},
@@ -27,18 +27,14 @@ variant::include!(variant_with_relations {
 
 type VariantWithRelations = variant_with_relations::Data;
 
-impl AsImage for variant_with_relations::images::Data {
-    fn as_image(&self) -> prisma::image::Data {
-        prisma::image::Data {
-            ..self.image.clone()
-        }
-    }
-}
-
 impl VariantWithRelations {
     fn find_image_at(&self, index: usize) -> Option<Image> {
         if let Some(image) = &self.images.get(index) {
-            return Some(Image::from_data(&image.as_image(), "alt".into()));
+            let image = *image;
+            return Some(Image::from_data(
+                Into::<prisma::image::Data>::into(image.clone()),
+                "alt".into(),
+            ));
         }
 
         None
@@ -176,6 +172,13 @@ impl VariantWithTypes {
     }
 }
 
+impl Into<prisma::image::Data> for &variant_with_relations::images::Data {
+    fn into(self) -> prisma::image::Data {
+        prisma::image::Data {
+            ..self.image.clone()
+        }
+    }
+}
 #[derive(Type, Serialize, Debug, Clone, PartialEq, Eq, Default)]
 pub struct Variant {
     pub id: String,
@@ -213,7 +216,14 @@ impl Variant {
         let data: VariantWithRelations = from.into();
         let price = Variant::get_product_price(data.price_in_cents, data.compare_at_price_in_cents);
 
-        let images = Image::extract_images(&data.images, product_name);
+        // let images = Image::extract_images(&data.images.clone(), product_name);
+
+        let images = data
+            .images
+            .iter()
+            .map(|i| Image::from_data(Into::into(i), product_name.clone()))
+            .collect();
+
         let mut image = data.find_image_at(0);
 
         let product: Product = data.product.into();
