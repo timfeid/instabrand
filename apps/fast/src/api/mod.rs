@@ -3,6 +3,7 @@ use std::{future::Future, path::PathBuf, sync::Arc};
 use axum_sessions::{async_session::Session, extractors::WritableSession};
 pub use rspc::RouterBuilder;
 use rspc::{integrations::httpz::CookieJar, Config};
+use stripe::Client;
 use tokio::sync::RwLockReadGuard;
 use tower_cookies::Cookies;
 
@@ -14,6 +15,7 @@ use crate::{
 pub struct Ctx {
     pub db: Arc<prisma::PrismaClient>,
     pub session_handle: Arc<tokio::sync::RwLock<Session>>,
+    pub stripe: Arc<Client>,
 }
 
 pub type Router<'a> = rspc::Router<Ctx>;

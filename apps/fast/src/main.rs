@@ -16,6 +16,11 @@ use prisma_client_rust::chrono::format;
 use rand::Rng;
 use rspc::integrations::httpz::{Request, TCtxFunc};
 use std::{net::SocketAddr, sync::Arc};
+use stripe::{
+    CheckoutSession, CheckoutSessionMode, Client, CreateCheckoutSession,
+    CreateCheckoutSessionLineItems, CreateCustomer, CreatePrice, CreateProduct, Currency, Customer,
+    Expandable, IdOrCreate, Price, Product,
+};
 use tokio::sync::RwLock;
 use tower_cookies::{CookieManagerLayer, Cookies};
 use tower_http::cors::{Any, CorsLayer};
@@ -33,6 +38,7 @@ mod variant;
 fn router(db: Arc<PrismaClient>) -> axum::Router {
     dotenv::dotenv().unwrap();
     let router = api::new().build().arced();
+    let stripe = Arc::new(Client::new(dotenv::var("STRIPE_SECRET").unwrap()));
 
     let store = MemoryStore::new();
     let secret: [u8; 64] = {
@@ -64,7 +70,11 @@ fn router(db: Arc<PrismaClient>) -> axum::Router {
                     let session_handle =
                         req.extensions().get::<SessionHandle>().unwrap().to_owned();
 
-                    Ctx { session_handle, db }
+                    Ctx {
+                        session_handle,
+                        db,
+                        stripe,
+                    }
                 })
                 .axum(),
         )

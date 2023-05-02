@@ -10,19 +10,22 @@ export type Procedures = {
         { key: "somethingelse", input: never, result: string } | 
         { key: "state.list", input: never, result: State[] },
     mutations: 
+        { key: "cart.createIntent", input: string, result: IntentResponse } | 
         { key: "cart.set", input: SetCart, result: Cart },
     subscriptions: never
 };
 
-export type Order = { id: string; line_items: LineItem[]; subtotal_cents: number; total_cents: number }
-
 export type ProductPrice = { actual_cents: number; compare_at_cents: number | null }
+
+export type Order = { id: string; line_items: LineItem[]; subtotal_cents: number; total_cents: number }
 
 export type PictureSource = { media: string; srcset: string }
 
 export type Product = { id: string; name: string; slug: string; price: ProductPrice; description: string; primary_image: Image | null; secondary_image: Image | null; images: Image[]; availability: ProductAvailability; label: string | null; variants: Variant[] }
 
 export type VariantWithTypes = { variant: Variant; types: ProductListType[]; product: Product }
+
+export type LineItem = { variant: Variant; quantity: number }
 
 export type VariantWithType = { id: string; value: string; slug: string; selected: boolean }
 
@@ -32,16 +35,16 @@ export type State = { id: number; name: string; abbreviation: string }
 
 export type Image = { picture_sources: PictureSource[]; src: string; srcset: string; alt: string }
 
+export type IntentResponse = { success: boolean; error: string | null; id: string | null; secret: string | null }
+
 export type Variant = { id: string; slug: string; price: ProductPrice; availability: ProductAvailability; images: Image[]; image: Image | null; size: string | null; color: string | null; material: string | null; style: string | null; product: Product }
-
-export type LineItem = { variant: Variant; quantity: number }
-
-export type CreateOrderLineItem = { variant_id: string; quantity: number }
 
 export type SetCart = { brand_id: string; line_items: CreateOrderLineItem[] }
 
 export type ProductListType = { name: string; variants: VariantWithType[] }
 
 export type ProductAvailability = "InStock" | "Limited" | "SoldOut" | "PreOrder"
+
+export type CreateOrderLineItem = { variant_id: string; quantity: number }
 
 export type SessionCart = { line_items: CreateOrderLineItem[]; id: string }

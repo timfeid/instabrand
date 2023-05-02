@@ -1,5 +1,6 @@
-use prisma_client_rust::QueryError;
+use prisma_client_rust::{bigdecimal::ToPrimitive, QueryError};
 use std::sync::Arc;
+use stripe::{Client, CreatePaymentIntent, PaymentIntent, StripeError};
 use ulid::Ulid;
 
 use crate::{
@@ -64,7 +65,7 @@ impl From<order_with_relations::line_items::variant::Data> for variant_with_rela
 
 impl From<order_with_relations::Data> for Order {
     fn from(value: order_with_relations::Data) -> Self {
-        let mut subtotal = 0;
+        let mut subtotal: i32 = 0;
         let mut line_items: Vec<LineItem> = vec![];
 
         for item in value.line_items {
@@ -234,5 +235,28 @@ impl OrderWithDatabase {
         if let Some(order) = Order::find_by_id(self.db.clone(), self.order.id.clone(), None).await {
             self.order = order.order;
         }
+    }
+
+    pub async fn create_payment_intent(
+        &mut self,
+        stripe: Arc<Client>,
+    ) -> Result<PaymentIntent, StripeError> {
+        let create_payment_intent = CreatePaymentIntent::new(
+            self.order.total_cents.to_i64().unwrap(),
+            stripe::Currency::USD,
+        );
+
+        let payment_intent = PaymentIntent::create(&stripe, create_payment_intent).await?;
+
+        let db = &self.db;
+
+        let updates = vec![prisma::order::stripe_payment_intent_id::set(Some(
+            payment_intent.id.to_string(),
+        ))];
+
+        db.order()
+            .update(prisma::order::id::equals(self.order.id.clone()), updates);
+
+        Ok(payment_intent)
     }
 }

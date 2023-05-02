@@ -1,8 +1,9 @@
 use axum::handler::Layered;
 use rspc::{
     integrations::httpz::CookieJar, internal::LayerResult, selection, ErrorCode, RequestLayer,
-    Router,
+    Router, Type,
 };
+use serde::{Deserialize, Serialize};
 use tower_cookies::Cookie;
 
 use crate::{
@@ -17,8 +18,32 @@ use rspc::Error;
 
 use super::cart::{Cart, SetCart};
 
+#[derive(Type, Default, Deserialize, Debug, Serialize)]
+struct IntentResponse {
+    success: bool,
+    error: Option<String>,
+    id: Option<String>,
+    secret: Option<String>,
+}
+
 pub fn create_cart_router() -> rspc::RouterBuilder<Ctx> {
     <Router<Ctx>>::new()
+        .mutation("createIntent", |t| {
+            t(|ctx, cart_id: String| async move {
+                let mut response = IntentResponse::default();
+                if let Some(mut order) =
+                    Order::find_by_id(ctx.db, cart_id, Some(OrderStatus::Cart)).await
+                {
+                    if let Ok(intent) = order.create_payment_intent(ctx.stripe).await {
+                        response.success = true;
+                        response.secret = intent.client_secret;
+                        response.id = Some(intent.id.to_string());
+                    }
+                }
+
+                response
+            })
+        })
         .mutation("set", |t| {
             t(|ctx, details: SetCart| async move {
                 let session_key = format!("cart-{}", details.brand_id);
