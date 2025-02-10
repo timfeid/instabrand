@@ -7,13 +7,16 @@
 	export let data: PageData;
 
 	if (!$cart || !$cart.id) {
-    console.log(JSON.stringify(data, null, 2))
+		console.log(JSON.stringify(data, null, 2));
 		cart.set(
 			data.cart
 				? {
-						line_items: data.cart.line_items.map(item => ({variant: {id: item.variant_id}, quantity: item.quantity})),
+						line_items: data.cart.line_items.map((item) => ({
+							variant: { id: item.variant_id },
+							quantity: item.quantity,
+						})),
 						id: data.cart.id,
-            sync: false,
+						sync: false,
 				  }
 				: { ...defaultCart },
 		);

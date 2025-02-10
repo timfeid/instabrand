@@ -4,14 +4,19 @@ create extension postgis;
 CREATE TYPE "OrderType" AS ENUM ('store_front', 'portal');
 
 -- CreateEnum
-CREATE TYPE "OrderStatus" AS ENUM ('cart', 'payment_failed', 'waiting_shipping', 'shipping', 'finished');
+CREATE TYPE "OrderStatus" AS ENUM (
+    'cart',
+    'payment_failed',
+    'waiting_shipping',
+    'shipping',
+    'finished'
+);
 
 -- CreateTable
 CREATE TABLE "states" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "abbreviation" VARCHAR(2) NOT NULL,
-
     CONSTRAINT "states_pkey" PRIMARY KEY ("id")
 );
 
@@ -25,7 +30,6 @@ CREATE TABLE "addresses" (
     "zip" TEXT NOT NULL,
     "city" TEXT NOT NULL,
     "geom" geometry(Point, 4326) NOT NULL,
-
     CONSTRAINT "addresses_pkey" PRIMARY KEY ("id")
 );
 
@@ -44,7 +48,6 @@ CREATE TABLE "customers" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "stripe_customer_id" TEXT,
-
     CONSTRAINT "customers_pkey" PRIMARY KEY ("id")
 );
 
@@ -56,7 +59,6 @@ CREATE TABLE "users" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "customerId" TEXT,
-
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
@@ -70,7 +72,6 @@ CREATE TABLE "products" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deleted_at" TIMESTAMP(3),
-
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
 
@@ -78,7 +79,6 @@ CREATE TABLE "products" (
 CREATE TABLE "inventory_location" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-
     CONSTRAINT "inventory_location_pkey" PRIMARY KEY ("id")
 );
 
@@ -91,16 +91,14 @@ CREATE TABLE "inventories" (
     "sku" TEXT,
     "barcode" TEXT,
     "is_allowed_to_oversell" BOOLEAN NOT NULL DEFAULT false,
-
-    CONSTRAINT "inventories_pkey" PRIMARY KEY ("inventory_location_id","variant_id")
+    CONSTRAINT "inventories_pkey" PRIMARY KEY ("inventory_location_id", "variant_id")
 );
 
 -- CreateTable
 CREATE TABLE "image_product" (
     "url" TEXT NOT NULL,
     "product_id" TEXT NOT NULL,
-
-    CONSTRAINT "image_product_pkey" PRIMARY KEY ("url","product_id")
+    CONSTRAINT "image_product_pkey" PRIMARY KEY ("url", "product_id")
 );
 
 -- CreateTable
@@ -113,7 +111,6 @@ CREATE TABLE "Image" (
     "url_tablet_2x" TEXT NOT NULL,
     "url_desktop" TEXT NOT NULL,
     "url_desktop_2x" TEXT NOT NULL,
-
     CONSTRAINT "Image_pkey" PRIMARY KEY ("url")
 );
 
@@ -121,8 +118,7 @@ CREATE TABLE "Image" (
 CREATE TABLE "VariantImage" (
     "url" TEXT NOT NULL,
     "variant_id" TEXT NOT NULL,
-
-    CONSTRAINT "VariantImage_pkey" PRIMARY KEY ("url","variant_id")
+    CONSTRAINT "VariantImage_pkey" PRIMARY KEY ("url", "variant_id")
 );
 
 -- CreateTable
@@ -141,7 +137,6 @@ CREATE TABLE "variants" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deleted_at" TIMESTAMP(3),
-
     CONSTRAINT "variants_pkey" PRIMARY KEY ("id")
 );
 
@@ -154,7 +149,6 @@ CREATE TABLE "lines_items" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "productId" TEXT,
-
     CONSTRAINT "lines_items_pkey" PRIMARY KEY ("id")
 );
 
@@ -165,7 +159,6 @@ CREATE TABLE "order_attempts" (
     "type" "OrderType" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "description" TEXT NOT NULL,
-
     CONSTRAINT "order_attempts_pkey" PRIMARY KEY ("token")
 );
 
@@ -176,7 +169,6 @@ CREATE TABLE "cards" (
     "last4" TEXT NOT NULL,
     "exp_year" INTEGER NOT NULL,
     "exp_month" INTEGER NOT NULL,
-
     CONSTRAINT "cards_pkey" PRIMARY KEY ("id")
 );
 
@@ -186,7 +178,6 @@ CREATE TABLE "order_payments" (
     "attempt_id" TEXT,
     "card_id" TEXT,
     "amount" INTEGER NOT NULL,
-
     CONSTRAINT "order_payments_pkey" PRIMARY KEY ("stripe_chard_id")
 );
 
@@ -201,7 +192,6 @@ CREATE TABLE "order_templates" (
     "show_email" BOOLEAN NOT NULL DEFAULT true,
     "show_address" BOOLEAN NOT NULL DEFAULT true,
     "show_website" BOOLEAN NOT NULL DEFAULT true,
-
     CONSTRAINT "order_templates_pkey" PRIMARY KEY ("id")
 );
 
@@ -212,7 +202,6 @@ CREATE TABLE "order_status_updates" (
     "previous_order_status" "OrderStatus",
     "new_order_status" "OrderStatus" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
     CONSTRAINT "order_status_updates_pkey" PRIMARY KEY ("id")
 );
 
@@ -233,7 +222,6 @@ CREATE TABLE "orders" (
     "discount" INTEGER,
     "stripe_payment_intent_id" TEXT,
     "template_id" TEXT,
-
     CONSTRAINT "orders_pkey" PRIMARY KEY ("id")
 );
 
@@ -247,15 +235,11 @@ CREATE TABLE "brands" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "address_id" TEXT NOT NULL,
-
     CONSTRAINT "brands_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "_brand_user" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
-);
+CREATE TABLE "_brand_user" ("A" TEXT NOT NULL, "B" TEXT NOT NULL);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "states_name_key" ON "states"("name");
@@ -291,73 +275,161 @@ CREATE UNIQUE INDEX "_brand_user_AB_unique" ON "_brand_user"("A", "B");
 CREATE INDEX "_brand_user_B_index" ON "_brand_user"("B");
 
 -- AddForeignKey
-ALTER TABLE "addresses" ADD CONSTRAINT "addresses_state_id_fkey" FOREIGN KEY ("state_id") REFERENCES "states"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "addresses"
+ADD
+    CONSTRAINT "addresses_state_id_fkey" FOREIGN KEY ("state_id") REFERENCES "states"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "customers" ADD CONSTRAINT "customers_address_id_fkey" FOREIGN KEY ("address_id") REFERENCES "addresses"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "customers"
+ADD
+    CONSTRAINT "customers_address_id_fkey" FOREIGN KEY ("address_id") REFERENCES "addresses"("id") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "customers" ADD CONSTRAINT "customers_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "customers"
+ADD
+    CONSTRAINT "customers_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "users"
+ADD
+    CONSTRAINT "users_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "products"
+ADD
+    CONSTRAINT "products_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "inventories" ADD CONSTRAINT "inventories_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "variants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "inventories"
+ADD
+    CONSTRAINT "inventories_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "variants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "image_product" ADD CONSTRAINT "image_product_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "image_product"
+ADD
+    CONSTRAINT "image_product_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "image_product" ADD CONSTRAINT "image_product_url_fkey" FOREIGN KEY ("url") REFERENCES "Image"("url") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "image_product"
+ADD
+    CONSTRAINT "image_product_url_fkey" FOREIGN KEY ("url") REFERENCES "Image"("url") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "VariantImage" ADD CONSTRAINT "VariantImage_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "variants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "VariantImage"
+ADD
+    CONSTRAINT "VariantImage_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "variants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "variants" ADD CONSTRAINT "variants_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "variants"
+ADD
+    CONSTRAINT "variants_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "lines_items" ADD CONSTRAINT "lines_items_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "variants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "lines_items"
+ADD
+    CONSTRAINT "lines_items_variant_id_fkey" FOREIGN KEY ("variant_id") REFERENCES "variants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "lines_items" ADD CONSTRAINT "lines_items_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "lines_items"
+ADD
+    CONSTRAINT "lines_items_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order_attempts" ADD CONSTRAINT "order_attempts_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "order_attempts"
+ADD
+    CONSTRAINT "order_attempts_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order_payments" ADD CONSTRAINT "order_payments_card_id_fkey" FOREIGN KEY ("card_id") REFERENCES "cards"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "order_payments"
+ADD
+    CONSTRAINT "order_payments_card_id_fkey" FOREIGN KEY ("card_id") REFERENCES "cards"("id") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order_payments" ADD CONSTRAINT "order_payments_attempt_id_fkey" FOREIGN KEY ("attempt_id") REFERENCES "order_attempts"("token") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "order_payments"
+ADD
+    CONSTRAINT "order_payments_attempt_id_fkey" FOREIGN KEY ("attempt_id") REFERENCES "order_attempts"("token") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "order_templates" ADD CONSTRAINT "order_templates_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "order_templates"
+ADD
+    CONSTRAINT "order_templates_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "orders" ADD CONSTRAINT "orders_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "order_templates"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "orders"
+ADD
+    CONSTRAINT "orders_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "order_templates"("id") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "orders" ADD CONSTRAINT "orders_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "orders"
+ADD
+    CONSTRAINT "orders_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "brands"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "orders" ADD CONSTRAINT "orders_billing_address_id_fkey" FOREIGN KEY ("billing_address_id") REFERENCES "addresses"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "orders"
+ADD
+    CONSTRAINT "orders_billing_address_id_fkey" FOREIGN KEY ("billing_address_id") REFERENCES "addresses"("id") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "orders" ADD CONSTRAINT "orders_shipping_address_id_fkey" FOREIGN KEY ("shipping_address_id") REFERENCES "addresses"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "orders"
+ADD
+    CONSTRAINT "orders_shipping_address_id_fkey" FOREIGN KEY ("shipping_address_id") REFERENCES "addresses"("id") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "orders" ADD CONSTRAINT "orders_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE
+    "orders"
+ADD
+    CONSTRAINT "orders_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE
+SET
+    NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "brands" ADD CONSTRAINT "brands_address_id_fkey" FOREIGN KEY ("address_id") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE
+    "brands"
+ADD
+    CONSTRAINT "brands_address_id_fkey" FOREIGN KEY ("address_id") REFERENCES "addresses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_brand_user" ADD CONSTRAINT "_brand_user_A_fkey" FOREIGN KEY ("A") REFERENCES "brands"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE
+    "_brand_user"
+ADD
+    CONSTRAINT "_brand_user_A_fkey" FOREIGN KEY ("A") REFERENCES "brands"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "_brand_user" ADD CONSTRAINT "_brand_user_B_fkey" FOREIGN KEY ("B") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE
+    "_brand_user"
+ADD
+    CONSTRAINT "_brand_user_B_fkey" FOREIGN KEY ("B") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

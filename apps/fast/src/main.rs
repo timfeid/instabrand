@@ -56,7 +56,7 @@ fn router(db: Arc<PrismaClient>) -> axum::Router {
         .with_http_only(true)
         .with_cookie_domain(cookie_domain);
 
-    let allowed_origins = ["http://localhost:5173".parse::<HeaderValue>().unwrap()];
+    let allowed_origins = ["http://localhost:5175".parse::<HeaderValue>().unwrap()];
     let allowed_headers = [AUTHORIZATION, CONTENT_TYPE];
     let allowed_methods = [Method::GET, Method::POST, Method::OPTIONS];
 

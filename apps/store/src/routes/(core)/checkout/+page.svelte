@@ -9,6 +9,7 @@
 	import { cart } from '../../../lib/stores/cart';
 
 	export let data: PageData;
+	console.log(data.cart.line_items);
 
 	const options = [
 		{ state: 'idle', component: Idle },

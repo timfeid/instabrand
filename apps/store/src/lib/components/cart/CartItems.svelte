@@ -8,7 +8,7 @@
 	export let editable = true;
 </script>
 
-{#each items as row}
+{#each items.filter((i) => i.variant.product) as row}
 	<div class="last:border-0 last:mb-0 last:pb-0 border-b pb-4 mb-4 flex flex-col md:flex-row">
 		<div class="flex flex-row w-full">
 			<div class="w-80 h-80 mr-16">
@@ -25,11 +25,11 @@
 					>
 					<div class="text-sm mt-1">
 						{#each ['size', 'color', 'material', 'style'] as prop}
-              {#if row.variant[prop]}
-                <div>
-                  {prop}: {row.variant[prop]}
-                </div>
-              {/if}
+							{#if row.variant[prop]}
+								<div>
+									{prop}: {row.variant[prop]}
+								</div>
+							{/if}
 						{/each}
 					</div>
 					<div class="mt-1 font-normal mb-4 flex">
@@ -39,9 +39,14 @@
 
 						<ProductPrice price={row.variant.price} themeName="cartLineItem" />
 					</div>
-          {#if editable}
-            <ProductQuantity quantity={row.quantity} variant={row.variant} themeName="productPage" replaceOnChange />
-          {/if}
+					{#if editable}
+						<ProductQuantity
+							quantity={row.quantity}
+							variant={row.variant}
+							themeName="productPage"
+							replaceOnChange
+						/>
+					{/if}
 				</div>
 			</div>
 		</div>
